@@ -1,0 +1,151 @@
+/* Box sizing rules */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+/* Prevent font size inflation */
+html {
+	-moz-text-size-adjust: none;
+	-webkit-text-size-adjust: none;
+	text-size-adjust: none;
+
+	font-family: var(--sk-font);
+	color-scheme: light dark;
+	interpolate-size: allow-keywords;
+}
+
+/* Remove list styles on ul, ol elements with a list role, which suggests default styling will be removed */
+:is(ul, ol)[class] {
+	list-style: "";
+	margin: 0;
+	padding: 0;
+}
+
+/* Set core body defaults */
+body {
+	margin: 0;
+	min-height: 100vh;
+	line-height: 1.6;
+}
+
+/* Set shorter line heights on headings and interactive elements */
+h1,
+h2,
+h3,
+h4,
+button,
+input,
+label {
+	line-height: 1.1;
+}
+
+/* Balance text wrapping on headings */
+h1,
+h2,
+h3,
+h4 {
+	text-wrap: balance;
+}
+
+p,
+li,
+figcaption {
+	max-width: var(--body-max-width);
+	text-wrap: pretty;
+}
+
+:first-child {
+	margin-block-start: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+	margin-block-end: 0;
+}
+
+/* A elements that don't have a class get default styles */
+a:not([class]) {
+	text-decoration-skip-ink: auto;
+	color: currentColor;
+}
+
+/* Make images easier to work with */
+
+video,
+canvas,
+svg {
+	max-width: 100%;
+	display: block;
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+	vertical-align: middle;
+	font-style: italic;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+/* Inherit fonts for inputs and buttons */
+input,
+button,
+textarea,
+select {
+	font-family: inherit;
+	font-size: inherit;
+}
+
+/* Make sure textareas without a rows attribute are not tiny */
+textarea:not([rows]) {
+	min-height: 10em;
+}
+
+/* Anything that has been anchored to should have extra scroll margin */
+:target {
+	scroll-margin-block: 32px;
+	scroll-margin-block: 5rlh;
+}
+
+/* visually hidden, but accessible to assistive tech */
+.visually-hidden:not(:focus):not(:active) {
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: clip(0 0 0 0); /* for IE only*/
+	clip-path: inset(50%);
+	position: absolute;
+	white-space: nowrap;
+}
+
+/* Smooth scrolling for users that don't prefer reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+	:has(:target) {
+		scroll-behavior: smooth;
+	}
+}
+
+/* Remove all animations, transitions and smooth scroll for people that prefer not to see them */
+@media (prefers-reduced-motion: reduce) {
+	:has(:target) {
+		scroll-behavior: auto;
+	}
+
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

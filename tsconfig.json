@@ -1,16 +1,33 @@
 {
 	"extends": "./.svelte-kit/tsconfig.json",
 	"compilerOptions": {
+		/* Base Options: */
 		"allowJs": true,
-		"checkJs": true,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,
+		"moduleDetection": "force",
 		"skipLibCheck": true,
+		"noErrorTruncation": true,
+        "moduleResolution": "bundler",
+		/* EMIT RULES */
+		"outDir": "dist",
+		"declaration": true,
+		"declarationMap": true,
 		"sourceMap": true,
+		"removeComments": true,
+		/* Strictness */
 		"strict": true,
-		"moduleResolution": "bundler"
-	}
+		"noUncheckedIndexedAccess": true,
+		"checkJs": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"useUnknownInCatchVariables": true
+
+    }
 	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
 	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
 	//
