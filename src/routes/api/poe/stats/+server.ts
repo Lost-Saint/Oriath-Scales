@@ -1,24 +1,18 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { promises as fs } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { join } from 'path';
 
 // Constants
 const CACHE_DURATION = 24 * 60 * 60; // 24h in seconds
-
-// Determine root path of the project
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const rootPath = join(__dirname, '..', '..', '..', '..');
+const CACHE_PATH = join(process.cwd(), 'src/lib/server/cache/stats.json');
 
 /**
  * Read stats cache from filesystem
  */
 async function readCache(): Promise<{data: any, lastUpdated: string} | null> {
   try {
-    const cachePath = join(rootPath, 'static', 'cache', 'stats.json');
-    const cacheContent = await fs.readFile(cachePath, 'utf-8');
+    const cacheContent = await fs.readFile(CACHE_PATH, 'utf-8');
     return JSON.parse(cacheContent);
   } catch (error) {
     console.error('Error reading cache:', error);
@@ -31,10 +25,8 @@ async function readCache(): Promise<{data: any, lastUpdated: string} | null> {
  */
 async function writeCache(data: any): Promise<void> {
   try {
-    const cacheDir = join(rootPath, 'static', 'cache');
-    const cachePath = join(cacheDir, 'stats.json');
-    
     // Ensure the cache directory exists
+    const cacheDir = join(process.cwd(), 'src/lib/server/cache');
     try {
       await fs.mkdir(cacheDir, { recursive: true });
     } catch (err) {
@@ -42,11 +34,11 @@ async function writeCache(data: any): Promise<void> {
     }
     
     await fs.writeFile(
-      cachePath,
+      CACHE_PATH,
       JSON.stringify({
         data,
         lastUpdated: new Date().toISOString()
-      })
+      }, null, 2)
     );
     console.log('Stats cache updated');
   } catch (error) {
@@ -66,7 +58,6 @@ export const GET: RequestHandler = async () => {
     // If cache is valid, return it
     if (cache?.lastUpdated && cache.data) {
       const cacheAge = now - new Date(cache.lastUpdated).getTime();
-      
       if (cacheAge < CACHE_DURATION * 1000) {
         return json(cache.data, {
           headers: {
