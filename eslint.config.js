@@ -58,9 +58,9 @@ export default tsEslint.config(
 			// ignore the $$Props types in shadcn-svelte
 			'@typescript-eslint/no-unused-vars': [
 				'error',
-				{
-					varsIgnorePattern: '^\$\$(Props|Events|Slots|Generic)'
-				}
+                {
+                    varsIgnorePattern: '^$$Props|^$$Events|^$$Slots|^$$Generic'
+                 }
 			]
 		}
 	},
