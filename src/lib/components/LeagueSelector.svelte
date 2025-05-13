@@ -1,11 +1,25 @@
 <script lang="ts">
 	import { Select } from 'melt/components';
+	import { createEventDispatcher } from 'svelte';
+
+	// Props
+	export let selectedLeague = 'Dawn of the Hunt';
+
+	// Event dispatcher for communicating with parent components
+	const dispatch = createEventDispatcher<{
+		leagueChange: string;
+	}>();
 
 	const options = [
 		'Dawn of the Hunt',
 		'HC Dawn of the Hunt',
 		'Standard'
 	] as const;
+
+	function handleLeagueChange(league: string) {
+		selectedLeague = league;
+		dispatch('leagueChange', league);
+	}
 </script>
 
 <Select>
