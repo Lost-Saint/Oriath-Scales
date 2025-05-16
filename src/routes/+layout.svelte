@@ -4,4 +4,12 @@
 	let { children } = $props();
 </script>
 
-{@render children()}
+<main>
+	{@render children()}
+</main>
+
+<style>
+	main {
+		position: relative;
+	}
+</style>
