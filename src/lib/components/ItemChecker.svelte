@@ -472,41 +472,6 @@
 		background-color: rgb(255 255 255 / 0.1);
 		border-radius: 9999px;
 	}
-
-	/* Styling for formatted item text */
-	.separator {
-		color: rgb(96 165 250 / 0.5);
-	}
-
-	.item-class {
-		color: rgb(34 211 238);
-	}
-
-	.item-level {
-		color: rgb(96 165 250);
-	}
-
-	.rarity {
-		color: rgb(250 204 21);
-	}
-
-	.stat {
-		color: rgb(103 232 249);
-	}
-
-	.requirement {
-		color: rgb(156 163 175);
-	}
-
-	.item-name {
-		color: rgb(254 240 138);
-		font-weight: 600;
-	}
-
-	.regular-text {
-		color: rgb(255 255 255 / 0.9);
-	}
-
 	.error-message {
 		text-align: center;
 		padding: 0.5rem;
