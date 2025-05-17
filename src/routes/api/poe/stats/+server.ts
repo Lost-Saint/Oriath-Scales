@@ -4,6 +4,27 @@ import { promises as fs } from 'fs';
 import { join } from 'path';
 import type { RequestHandler } from './$types';
 
+interface StatEntry {
+	id: string;
+	text: string;
+	type: string; // Could be a union like `"explicit" | "implicit"` if known
+}
+
+interface StatGroup {
+	id: string;
+	label: string;
+	entries: StatEntry[];
+}
+
+interface StatsResult {
+	result: StatGroup[];
+}
+
+interface CacheData {
+	data: StatsResult;
+	lastUpdated: string;
+}
+
 // Constants
 const CACHE_DURATION = 24 * 60 * 60; // 24h in seconds
 const CACHE_PATH = join(process.cwd(), 'src/lib/server/cache/stats.json');
@@ -11,7 +32,7 @@ const CACHE_PATH = join(process.cwd(), 'src/lib/server/cache/stats.json');
 /**
  * Read stats cache from filesystem using tryCatch
  */
-async function readCache(): Promise<{ data: any; lastUpdated: string } | null> {
+async function readCache(): Promise<CacheData | null> {
 	const readResult = await tryCatch(fs.readFile(CACHE_PATH, 'utf-8'));
 
 	if (readResult.error) {
@@ -19,8 +40,8 @@ async function readCache(): Promise<{ data: any; lastUpdated: string } | null> {
 		return null;
 	}
 
-	const parseResult = tryCatch<{ data: any; lastUpdated: string }>(() =>
-		JSON.parse(readResult.data)
+	const parseResult = tryCatch<CacheData>(
+		() => JSON.parse(readResult.data) as CacheData
 	);
 
 	if (parseResult.error) {
@@ -34,14 +55,14 @@ async function readCache(): Promise<{ data: any; lastUpdated: string } | null> {
 /**
  * Write stats data to cache file using tryCatch
  */
-async function writeCache(data: any): Promise<void> {
+async function writeCache(data: StatsResult): Promise<void> {
 	// Ensure the cache directory exists
 	const cacheDir = join(process.cwd(), 'src/lib/server/cache');
 
 	// Create directory (ignore errors if it exists)
 	await tryCatch(fs.mkdir(cacheDir, { recursive: true }));
 
-	const cacheData = {
+	const cacheData: CacheData = {
 		data,
 		lastUpdated: new Date().toISOString()
 	};
@@ -150,10 +171,13 @@ export const GET: RequestHandler = async () => {
 		);
 	}
 
-	// Write new data to cache asynchronously
-	void tryCatch(writeCache(jsonResult.data));
+	// Validate that the response matches our expected format
+	const apiResponse = jsonResult.data as StatsResult;
 
-	return json(jsonResult.data, {
+	// Write new data to cache asynchronously
+	void tryCatch(writeCache(apiResponse));
+
+	return json(apiResponse, {
 		headers: {
 			'Cache-Control': `public, max-age=${CACHE_DURATION}`,
 			'Content-Type': 'application/json'

@@ -19,6 +19,23 @@ interface RateLimitState {
 	lastReset: number;
 }
 
+/**
+ * Interface for request body
+ */
+interface RequestBody {
+	league: string;
+	query: Record<string, unknown>;
+}
+
+/**
+ * Interface for API response
+ */
+interface ApiResponse {
+	id: string;
+	result: unknown[];
+	[key: string]: unknown;
+}
+
 // In-memory rate limit state (note: will reset on server restart)
 const rateLimitState: RateLimitState = {
 	tiers: [
@@ -145,7 +162,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		);
 	}
 
-	const body = requestBodyResult.data;
+	const body = requestBodyResult.data as RequestBody;
 	const baseUrl = getBaseUrl();
 
 	// Make API request
@@ -232,7 +249,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		);
 	}
 
-	const data = jsonResult.data;
+	const data = jsonResult.data as ApiResponse;
 	if (!data.id) {
 		console.error('Invalid API Response:', data);
 		return json(

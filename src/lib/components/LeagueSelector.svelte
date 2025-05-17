@@ -26,7 +26,7 @@
 				{select.value ?? 'Select a league'}
 			</button>
 			<div {...select.content} class="select-content">
-				{#each leagues as league}
+				{#each leagues as league (league)}
 					<div {...select.getOption(league)} class="select-option">
 						<span>{league}</span>
 					</div>
