@@ -7,7 +7,8 @@
 	const leagues = [
 		'Dawn of the Hunt',
 		'HC Dawn of the Hunt',
-		'Standard'
+		'Standard',
+		'Hardcore'
 	] as const;
 	let internalLeague = selectedLeague;
 

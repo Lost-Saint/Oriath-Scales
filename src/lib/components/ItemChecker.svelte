@@ -232,7 +232,7 @@
 			});
 
 			if (!response.ok) {
-				const errorData = await response.json();
+				const errorData: { error?: string } = await response.json();
 				if (response.status === 429) {
 					throw new Error(
 						'Too many requests. Please wait a moment and try again.'
@@ -241,7 +241,8 @@
 				throw new Error(errorData.error || 'Search failed');
 			}
 
-			const data = await response.json();
+			type SearchResponse = { id: string };
+			const data: SearchResponse = await response.json();
 
 			if (data.id) {
 				const tradeUrl = `https://www.pathofexile.com/trade2/search/${league}/${data.id}`;

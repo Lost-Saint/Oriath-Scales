@@ -83,21 +83,21 @@ function checkRateLimit(): { allowed: boolean; timeToWait?: number } {
  * Update internal rate limits based on API response headers
  */
 function updateRateLimits(headers: Headers): void {
-  const ipState = headers.get('x-rate-limit-ip-state')?.split(',') || [];
+	const ipState = headers.get('x-rate-limit-ip-state')?.split(',') || [];
 
-  ipState.forEach((state, index) => {
-    // Ensure we get a valid number even if parsing fails
-    const parts = state.split(':');
-    const hits = parts.length > 0 ? Number(parts[0]) : 0;
-    
-    // Only update if hits is a valid number and the tier exists
-    if (!isNaN(hits) && rateLimitState.tiers[index]) {
-      rateLimitState.tiers[index].hits = hits;
-    }
-  });
+	ipState.forEach((state, index) => {
+		// Ensure we get a valid number even if parsing fails
+		const parts = state.split(':');
+		const hits = parts.length > 0 ? Number(parts[0]) : 0;
 
-  rateLimitState.lastReset = Date.now();
-  console.log(`[Rate Limits] ${getRateLimitStatus()}`);
+		// Only update if hits is a valid number and the tier exists
+		if (!isNaN(hits) && rateLimitState.tiers[index]) {
+			rateLimitState.tiers[index].hits = hits;
+		}
+	});
+
+	rateLimitState.lastReset = Date.now();
+	console.log(`[Rate Limits] ${getRateLimitStatus()}`);
 }
 
 /**

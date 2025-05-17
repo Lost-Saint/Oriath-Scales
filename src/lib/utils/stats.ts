@@ -152,7 +152,10 @@ function createFuseInstance(stats: StatOption[]): Fuse<StatOption> {
 			if (path === 'text' && typeof value === 'string') {
 				return normalizeStatText(value);
 			}
-			return value ? String(value) : '';
+			if (typeof value === 'string' || typeof value === 'number') {
+				return value;
+			}
+			return '';
 		}
 	});
 }
