@@ -1,6 +1,6 @@
+import { tryCatch } from '$lib/utils/error'; // Adjust import path as needed
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { tryCatch } from '$lib/utils/error'; // Adjust import path as needed
 
 /**
  * Rate limiting tier configuration
@@ -154,7 +154,8 @@ export const POST: RequestHandler = async ({ request }) => {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				'User-Agent': 'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
+				'User-Agent':
+					'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
 				Accept: '*/*'
 			},
 			body: JSON.stringify(body.query)
@@ -166,7 +167,10 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json(
 			{
 				error: 'Failed to connect to PoE API',
-				details: fetchResult.error instanceof Error ? fetchResult.error.message : String(fetchResult.error)
+				details:
+					fetchResult.error instanceof Error
+						? fetchResult.error.message
+						: String(fetchResult.error)
 			},
 			{ status: 500 }
 		);
