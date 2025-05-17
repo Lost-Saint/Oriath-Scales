@@ -1,0 +1,11 @@
+# Reference: https://www.robotstxt.org/robotstxt.html
+
+# Global rules for all user agents
+User-agent: *
+Disallow: /*.js$
+Disallow: /*.json$
+Disallow: /api/
+
+# Block GPTBot specifically
+User-agent: GPTBot
+Disallow: /
