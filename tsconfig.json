@@ -4,6 +4,7 @@
 		/* Base Options: */
 		"allowJs": true,
 		"esModuleInterop": true,
+		"lib": ["es2022", "dom", "dom.iterable"],
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,
 		"moduleDetection": "force",

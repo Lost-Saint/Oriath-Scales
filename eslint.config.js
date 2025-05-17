@@ -85,7 +85,9 @@ export default tsEslint.config(
 			'.vscode',
 			'build',
 			'static',
+			'reset.d.ts',
 			'package',
+			'scripts',
 			'coverage',
 			'node_modules'
 		]
