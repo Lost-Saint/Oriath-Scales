@@ -16,6 +16,7 @@
 		"format": "prettier --write '{src,tests}/**/*.{js,ts,svelte}'",
 		"update-cache": "tsx scripts/updateStatsCache.ts"
 	},
+	"packageManager": "pnpm@10.11.0",
 	"devDependencies": {
 		"@eslint/js": "^9.27.0",
 		"@sveltejs/adapter-auto": "^6.0.1",
