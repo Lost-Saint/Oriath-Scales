@@ -71,6 +71,7 @@
 		position: absolute;
 		pointer-events: none;
 		opacity: 0;
+		margin: 0;
 
 		transform: scale(0.975);
 
@@ -82,6 +83,7 @@
 	[data-melt-select-content][data-open] {
 		pointer-events: auto;
 		opacity: 1;
+		margin: 0;
 
 		transform: scale(1);
 	}

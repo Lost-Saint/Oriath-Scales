@@ -14,7 +14,7 @@ const FALLBACK_CACHE_DURATION = 60 * 60; // 1 hour in seconds
  *
  * Returns cached stats when available, or fetches fresh data
  */
-export const GET: RequestHandler = async () => {
+export const GET = (async () => {
 	// Step 1: Try to read from cache first
 	const cacheResult = await tryCatch(statsCache.read());
 
@@ -47,7 +47,7 @@ export const GET: RequestHandler = async () => {
 
 	// Step 6: Return the fresh data
 	return createSuccessResponse(apiResult.data, CACHE_DURATION_SECONDS);
-};
+}) satisfies RequestHandler;
 
 /**
  * Creates a standardized success response

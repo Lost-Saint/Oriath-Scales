@@ -9,7 +9,7 @@ import type { RequestHandler } from './$types';
 /**
  * SvelteKit POST handler for POE trade search
  */
-export const POST: RequestHandler = async ({ request }) => {
+export const POST = (async ({ request }) => {
 	// Step 1: Check rate limit before proceeding
 	const rateLimitResult = checkRateLimit();
 	if (!rateLimitResult.allowed) {
@@ -47,7 +47,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			500
 		);
 	}
-};
+}) satisfies RequestHandler;
 
 /**
  * Checks the rate limit and returns appropriate response if exceeded
