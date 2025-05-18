@@ -1,186 +1,75 @@
-import { tryCatch } from '$lib/utils/error';
+// src/routes/api/stats/+server.ts
 import { json } from '@sveltejs/kit';
-import { promises as fs } from 'fs';
-import { join } from 'path';
+import { tryCatch } from '$lib/utils/error';
+import { statsCache } from '$lib/server/services/stats/cache';
+import { statsApi } from '$lib/server/services/stats/api';
 import type { RequestHandler } from './$types';
 
-interface StatEntry {
-	id: string;
-	text: string;
-	type: string; // Could be a union like `"explicit" | "implicit"` if known
-}
-
-interface StatGroup {
-	id: string;
-	label: string;
-	entries: StatEntry[];
-}
-
-interface StatsResult {
-	result: StatGroup[];
-}
-
-interface CacheData {
-	data: StatsResult;
-	lastUpdated: string;
-}
-
-// Constants
-const CACHE_DURATION = 24 * 60 * 60; // 24h in seconds
-const CACHE_PATH = join(process.cwd(), 'src/lib/server/cache/stats.json');
+// Cache and HTTP configuration
+const CACHE_DURATION_SECONDS = 24 * 60 * 60; // 24 hours in seconds
+const FALLBACK_CACHE_DURATION = 60 * 60;     // 1 hour in seconds
 
 /**
- * Read stats cache from filesystem using tryCatch
- */
-async function readCache(): Promise<CacheData | null> {
-	const readResult = await tryCatch(fs.readFile(CACHE_PATH, 'utf-8'));
-
-	if (readResult.error) {
-		console.error('Error reading cache:', readResult.error);
-		return null;
-	}
-
-	const parseResult = tryCatch<CacheData>(
-		() => JSON.parse(readResult.data) as CacheData
-	);
-
-	if (parseResult.error) {
-		console.error('Error parsing cache:', parseResult.error);
-		return null;
-	}
-
-	return parseResult.data;
-}
-
-/**
- * Write stats data to cache file using tryCatch
- */
-async function writeCache(data: StatsResult): Promise<void> {
-	// Ensure the cache directory exists
-	const cacheDir = join(process.cwd(), 'src/lib/server/cache');
-
-	// Create directory (ignore errors if it exists)
-	await tryCatch(fs.mkdir(cacheDir, { recursive: true }));
-
-	const cacheData: CacheData = {
-		data,
-		lastUpdated: new Date().toISOString()
-	};
-
-	const writeResult = await tryCatch(
-		fs.writeFile(CACHE_PATH, JSON.stringify(cacheData, null, 2))
-	);
-
-	if (writeResult.error) {
-		console.error('Error writing cache:', writeResult.error);
-		return;
-	}
-
-	console.log('Stats cache updated');
-}
-
-/**
- * SvelteKit GET handler for POE stats
+ * SvelteKit GET handler for Path of Exile stats data
+ * 
+ * Returns cached stats when available, or fetches fresh data
  */
 export const GET: RequestHandler = async () => {
-	// Try to read from cache first
-	const cacheResult = await tryCatch(readCache());
-	const cache = cacheResult.error ? null : cacheResult.data;
-	const now = new Date().getTime();
-
-	// If cache is valid, return it
-	if (cache?.lastUpdated && cache.data) {
-		const cacheAge = now - new Date(cache.lastUpdated).getTime();
-		if (cacheAge < CACHE_DURATION * 1000) {
-			return json(cache.data, {
-				headers: {
-					'Cache-Control': `public, max-age=${CACHE_DURATION}`,
-					'Content-Type': 'application/json'
-				}
-			});
-		}
-	}
-
-	// Fetch fresh data from POE API
-	const fetchResult = await tryCatch(
-		fetch('https://www.pathofexile.com/api/trade2/data/stats', {
-			headers: {
-				'User-Agent':
-					'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
-				Accept: 'application/json'
-			}
-		})
-	);
-
-	if (fetchResult.error || !fetchResult.data.ok) {
-		// Fall back to expired cache if API fails
-		if (cache?.data) {
-			console.log('Using expired cache due to API failure');
-			return json(cache.data, {
-				headers: {
-					'Cache-Control': 'public, max-age=3600',
-					'Content-Type': 'application/json'
-				}
-			});
-		}
-
-		// No cache available, return error
-		console.error(
-			'Error fetching PoE stats:',
-			fetchResult.error ||
-				`Status: ${fetchResult.data?.status} ${fetchResult.data?.statusText}`
-		);
-
-		return json(
-			{ error: 'Failed to fetch stats' },
-			{
-				status: 500,
-				headers: {
-					'Cache-Control': 'no-store',
-					'Content-Type': 'application/json'
-				}
-			}
-		);
-	}
-
-	// Process successful response
-	const jsonResult = await tryCatch(fetchResult.data.json());
-
-	if (jsonResult.error) {
-		// Fall back to expired cache if parsing fails
-		if (cache?.data) {
-			console.log('Using expired cache due to API response parsing failure');
-			return json(cache.data, {
-				headers: {
-					'Cache-Control': 'public, max-age=3600',
-					'Content-Type': 'application/json'
-				}
-			});
-		}
-
-		console.error('Error parsing PoE stats response:', jsonResult.error);
-		return json(
-			{ error: 'Failed to parse stats response' },
-			{
-				status: 500,
-				headers: {
-					'Cache-Control': 'no-store',
-					'Content-Type': 'application/json'
-				}
-			}
-		);
-	}
-
-	// Validate that the response matches our expected format
-	const apiResponse = jsonResult.data as StatsResult;
-
-	// Write new data to cache asynchronously
-	void tryCatch(writeCache(apiResponse));
-
-	return json(apiResponse, {
-		headers: {
-			'Cache-Control': `public, max-age=${CACHE_DURATION}`,
-			'Content-Type': 'application/json'
-		}
-	});
+  // Step 1: Try to read from cache first
+  const cacheResult = await tryCatch(statsCache.read());
+  
+  // Step 2: Return valid cache if available
+  if (!cacheResult.error && cacheResult.data && !cacheResult.data.isExpired) {
+    return createSuccessResponse(cacheResult.data.data, CACHE_DURATION_SECONDS);
+  }
+  
+  // Step 3: Try to fetch fresh data from the API
+  const apiResult = await tryCatch(statsApi.fetchStats());
+  
+  // Step 4: Handle API failure by falling back to expired cache if available
+  if (apiResult.error) {
+    console.error('Failed to fetch fresh stats data:', apiResult.error);
+    
+    if (cacheResult.data?.data) {
+      console.log('Using expired cache due to API failure');
+      return createSuccessResponse(cacheResult.data.data, FALLBACK_CACHE_DURATION);
+    }
+    
+    // No cache available and API failed, return error
+    return createErrorResponse('Failed to fetch stats data');
+  }
+  
+  // Step 5: Cache the fresh data asynchronously (don't await)
+  void tryCatch(statsCache.write(apiResult.data));
+  
+  // Step 6: Return the fresh data
+  return createSuccessResponse(apiResult.data, CACHE_DURATION_SECONDS);
 };
+
+/**
+ * Creates a standardized success response
+ */
+function createSuccessResponse(data: unknown, maxAge: number) {
+  return json(data, {
+    headers: {
+      'Cache-Control': `public, max-age=${maxAge}`,
+      'Content-Type': 'application/json'
+    }
+  });
+}
+
+/**
+ * Creates a standardized error response
+ */
+function createErrorResponse(message: string, status: number = 500) {
+  return json(
+    { error: message },
+    {
+      status,
+      headers: {
+        'Cache-Control': 'no-store',
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+}
