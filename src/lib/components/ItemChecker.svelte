@@ -396,11 +396,10 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		padding: 1.5rem;
-		background: rgb(255 255 255 / 0.05);
 		backdrop-filter: blur(8px);
 		border-radius: 1rem;
 		box-shadow: var(--shadow-lg);
+		width: 100%;
 	}
 
 	.item-input-container {

@@ -4,12 +4,53 @@
 	let { children } = $props();
 </script>
 
-<main>
+<main class="flow content-grid">
 	{@render children()}
 </main>
 
+<footer class="full-width">
+	<div>
+		Design by
+		<a href="/" target="_blank" aria-label="logo">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="36"
+				height="36"
+				fill="none"
+				viewBox="0 0 40 40">
+				<path
+					fill="currentColor"
+					d="M0 20C0 8.954 8.954 0 20 0c8.121 0 15.112 4.84 18.245 11.794l-26.45 26.45a20 20 0 0 1-3.225-1.83L24.984 20H20L5.858 34.142A19.94 19.94 0 0 1 0 20M39.999 20.007 20.006 40c11.04-.004 19.99-8.953 19.993-19.993">
+				</path>
+			</svg>
+		</a>
+	</div>
+</footer>
+
 <style>
-	main {
-		position: relative;
+	footer {
+		--copyright_bg_color: #282a2b;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: var(--ls-text-xs);
+		padding: 18px 30px 16px;
+		background: var(--copyright_bg_color);
+
+		& div {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+
+			& a {
+				margin-left: 10px;
+			}
+		}
+	}
+
+	@media (min-width: 768px) {
+		footer {
+			justify-content: flex-start; /* Align to the left on larger screens */
+		}
 	}
 </style>

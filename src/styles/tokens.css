@@ -1,32 +1,55 @@
-	.separator {
-		color: rgb(96 165 250 / 0.5);
-	}
+:root {
+	--font-family: ui-sans-serif, system-ui, -apple-system, BlinkMackSystemFont, "Segoe UI", Roboto, sans-serif;
 
-	.item-class {
-		color: rgb(34 211 238);
-	}
+	--fs-300: clamp(0.94rem, calc(0.92rem + 0.08vw), 0.98rem);
+	--fs-400: clamp(1.13rem, calc(1.06rem + 0.33vw), 1.31rem);
+	--fs-500: clamp(1.35rem, calc(1.21rem + 0.69vw), 1.75rem);
+	--fs-600: clamp(1.62rem, calc(1.37rem + 1.24vw), 2.33rem);
+	--fs-700: clamp(1.94rem, calc(1.54rem + 2.03vw), 3.11rem);
+	--fs-800: clamp(2.33rem, calc(1.7rem + 3.15vw), 4.14rem);
+	--fs-900: clamp(2.8rem, calc(1.85rem + 4.74vw), 5.52rem);
 
-	.item-level {
-		color: rgb(96 165 250);
-	}
+	--clr-primary-300: hsl(219, 76%, 55%);
+	--clr-primary-400: hsl(219, 76%, 40%);
+	--clr-primary-500: hsl(219, 76%, 25%);
+	--clr-secondary-300: hsl(269, 75%, 55%);
+	--clr-secondary-400: hsl(269, 75%, 40%);
+	--clr-secondary-500: hsl(269, 75%, 25%);
+	--clr-accent-200: hsl(358, 85%, 80%);
+	--clr-accent-300: hsl(358, 72%, 65%);
+	--clr-accent-400: hsl(358, 72%, 50%);
+	--clr-accent-500: hsl(358, 72%, 35%);
+}
 
-	.rarity {
-		color: rgb(250 204 21);
-	}
+.separator {
+	color: rgb(96 165 250 / 0.5);
+}
 
-	.stat {
-		color: rgb(103 232 249);
-	}
+.item-class {
+	color: rgb(34 211 238);
+}
 
-	.requirement {
-		color: rgb(156 163 175);
-	}
+.item-level {
+	color: rgb(96 165 250);
+}
 
-	.item-name {
-		color: rgb(254 240 138);
-		font-weight: 600;
-	}
+.rarity {
+	color: rgb(250 204 21);
+}
 
-	.regular-text {
-		color: rgb(255 255 255 / 0.9);
-	}
+.stat {
+	color: rgb(103 232 249);
+}
+
+.requirement {
+	color: rgb(156 163 175);
+}
+
+.item-name {
+	color: rgb(254 240 138);
+	font-weight: 600;
+}
+
+.regular-text {
+	color: rgb(255 255 255 / 0.9);
+}
