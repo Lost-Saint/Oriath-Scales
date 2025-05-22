@@ -28,6 +28,6 @@ body:
       options:
         - annoyance
         - blocking an upgrade
-        - blocking all usage of Melt UI
+        - blocking all usage of Tome of Trade
     validations:
       required: true
