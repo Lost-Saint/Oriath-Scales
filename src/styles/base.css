@@ -1,3 +1,20 @@
+h1,
+h2,
+h3,
+.section-title {
+  font-family: var(--font-primary);
+  color: var(--text-accent);
+}
+
+body {
+  font-family: var(--font-secondary);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-normal);
+  line-height: var(--lh-normal);
+  background-color: var(--primary-dark);
+  color: var(--text-primary);
+}
+
 .content-grid {
   --padding-inline: 1rem;
   --content-max-width: 1200px;
@@ -53,7 +70,7 @@
 }
 
 .section-padding {
-  padding-block: 1.25rem;
+  padding-block: 2.50rem;
 }
 
 .wrapper {

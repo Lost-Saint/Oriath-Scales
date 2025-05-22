@@ -28,14 +28,20 @@
 </footer>
 
 <style>
+	main {
+		min-height: 100vh; /* Ensures it takes up at least the full height of the viewport */
+		display: flex;
+		flex-direction: column;
+	}
 	footer {
-		--copyright_bg_color: #282a2b;
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		font-size: var(--ls-text-xs);
+		font-size: var(--font-size-base);
 		padding: 18px 30px 16px;
-		background: var(--copyright_bg_color);
+		background: var(--ui-element-bg);
+		color: var(--text-secondary);
+		border-top: 1px solid var(--ui-border);
 
 		& div {
 			display: flex;
@@ -44,6 +50,18 @@
 
 			& a {
 				margin-left: 10px;
+				color: var(--text-primary);
+				transition: color 0.3s ease;
+
+				&:hover {
+					color: var(--primary-accent);
+				}
+
+				/* SVG styling */
+				& svg {
+					color: inherit;
+					transition: color 0.3s ease;
+				}
 			}
 		}
 	}

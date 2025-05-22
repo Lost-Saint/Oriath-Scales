@@ -375,31 +375,16 @@
 </div>
 
 <style>
-	/* Modern CSS with variables and useful features */
-	:root {
-		--color-bg: rgb(15 23 42 / 0.9);
-		--color-border: rgb(255 255 255 / 0.1);
-		--color-text: rgb(255 255 255 / 0.9);
-		--color-blue-500: #3b82f6;
-		--color-blue-600: #2563eb;
-		--color-cyan-500: #06b6d4;
-		--color-cyan-600: #0891b2;
-		--color-red-400: #f87171;
-		--color-red-500: #ef4444;
-		--color-red-900: #7f1d1d;
-		--transition-standard: 200ms ease;
-		--shadow-lg:
-			0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-	}
-
 	.item-checker {
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
 		backdrop-filter: blur(8px);
-		border-radius: 1rem;
+		border-radius: 0.75rem;
 		box-shadow: var(--shadow-lg);
 		width: 100%;
+		font-family: var(--font-secondary);
+		color: var(--text-primary);
 	}
 
 	.item-input-container {
@@ -411,20 +396,16 @@
 		content: '';
 		position: absolute;
 		inset: -4px;
-		background: linear-gradient(
-			to right,
-			var(--color-blue-600),
-			var(--color-cyan-600)
-		);
+		background: var(--primary-gradient);
 		border-radius: 0.75rem;
-		opacity: 0.2;
+		opacity: 0.15;
 		z-index: -1;
 		transition: opacity var(--transition-standard);
 	}
 
 	.item-input-container:hover::before {
-		opacity: 0.3;
-		transition-duration: 1000ms;
+		opacity: 0.25;
+		transition-duration: 800ms;
 	}
 
 	.item-input {
@@ -432,14 +413,13 @@
 		width: 100%;
 		height: 16rem;
 		padding: 1rem;
-		background-color: var(--color-bg);
-		border: 1px solid var(--color-border);
+		background-color: var(--primary-bg);
+		border: 1px solid var(--ui-border);
 		border-radius: 0.75rem;
-		color: var(--color-text);
-		font-family:
-			ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-		font-size: 0.875rem;
-		line-height: 1.5;
+		color: var(--text-primary);
+		font-family: var(--font-mono);
+		font-size: var(--font-size-sm);
+		line-height: var(--line-height-base);
 		overflow: auto;
 		white-space: pre-wrap;
 		transition:
@@ -449,36 +429,42 @@
 
 	.item-input:focus {
 		outline: none;
-		border-color: rgb(59 130 246 / 0.5);
-		box-shadow: 0 0 0 1px rgb(59 130 246 / 0.5);
+		border-color: rgba(209, 123, 70, 0.5);
+		box-shadow: 0 0 0 1px rgba(209, 123, 70, 0.3);
 	}
 
-	/* Scrollbar styling with modern approach */
+	/* Scrollbar styling */
 	.item-input {
 		scrollbar-width: thin;
-		scrollbar-color: rgb(255 255 255 / 0.1) rgb(255 255 255 / 0.05);
+		scrollbar-color: rgba(255, 255, 255, 0.15) rgba(255, 255, 255, 0.05);
 	}
 
 	.item-input::-webkit-scrollbar {
-		width: 8px;
+		width: 6px;
 	}
 
 	.item-input::-webkit-scrollbar-track {
-		background: rgb(255 255 255 / 0.05);
+		background: rgba(255, 255, 255, 0.05);
+		border-radius: 9999px;
 	}
 
 	.item-input::-webkit-scrollbar-thumb {
-		background-color: rgb(255 255 255 / 0.1);
+		background-color: rgba(255, 255, 255, 0.15);
 		border-radius: 9999px;
 	}
+
+	.item-input::-webkit-scrollbar-thumb:hover {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+
 	.error-message {
 		text-align: center;
-		padding: 0.5rem;
-		background-color: rgb(127 29 29 / 0.2);
-		border: 1px solid rgb(239 68 68 / 0.2);
+		padding: 0.75rem;
+		background-color: var(--ui-error-bg);
+		border: 1px solid var(--ui-error-border);
 		border-radius: 0.5rem;
-		color: var(--color-red-400);
-		font-size: 0.875rem;
+		color: var(--ui-error-text);
+		font-size: var(--font-size-sm);
 	}
 
 	.option-container {
@@ -486,11 +472,13 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.75rem;
-		color: rgb(255 255 255 / 0.8);
+		color: var(--text-secondary);
+		padding: 0.25rem 0;
 	}
 
 	.option-label {
-		font-size: 0.875rem;
+		font-size: var(--font-size-sm);
+		font-family: var(--font-secondary);
 		user-select: none;
 	}
 
@@ -501,33 +489,32 @@
 		height: 1.5rem;
 		width: 2.75rem;
 		border-radius: 9999px;
-		background-color: rgb(255 255 255 / 0.1);
+		background-color: var(--ui-toggle-bg);
 		transition: background-color var(--transition-standard);
+		border: 1px solid var(--ui-border);
 	}
 
 	.toggle-switch:focus-visible {
-		outline: 2px solid var(--color-blue-500);
+		outline: 2px solid var(--primary-accent);
 		outline-offset: 2px;
 	}
 
 	.toggle-switch.active {
-		background: linear-gradient(
-			to right,
-			var(--color-blue-600),
-			var(--color-cyan-600)
-		);
+		background: var(--primary-gradient);
+		border-color: transparent;
 	}
 
 	.toggle-knob {
 		position: absolute;
 		left: 0.25rem;
 		display: inline-block;
-		height: 1rem;
-		width: 1rem;
+		height: 0.9rem;
+		width: 0.9rem;
 		border-radius: 50%;
 		background-color: white;
 		transform: translateX(0);
 		transition: transform var(--transition-standard);
+		box-shadow: var(--shadow-sm);
 	}
 
 	.toggle-switch.active .toggle-knob {
@@ -537,19 +524,20 @@
 	.search-button {
 		position: relative;
 		width: 100%;
-		padding: 1rem 1.5rem;
+		padding: 0.9rem 1.5rem;
 		border: none;
 		border-radius: 0.75rem;
-		background: linear-gradient(
-			to right,
-			var(--color-blue-600),
-			var(--color-cyan-600)
-		);
+		background: var(--primary-gradient);
 		color: white;
-		font-weight: 500;
+		font-family: var(--font-primary);
+		font-size: var(--fs-base);
+		font-weight: var(--fw-medium);
+		letter-spacing: var(--ls-wide);
 		cursor: pointer;
-		transition: filter var(--transition-standard);
-		box-shadow: 0 10px 15px -3px rgb(37 99 235 / 0.2);
+		transition:
+			filter var(--transition-standard),
+			box-shadow var(--transition-standard);
+		box-shadow: var(--shadow-md);
 		overflow: hidden;
 		isolation: isolate;
 	}
@@ -557,29 +545,25 @@
 	.search-button::before {
 		content: '';
 		position: absolute;
-		inset: -4px;
-		background: linear-gradient(
-			to right,
-			var(--color-blue-600),
-			var(--color-cyan-600)
+		inset: 0;
+		background: radial-gradient(
+			circle at 30% 107%,
+			rgba(255, 255, 255, 0.2) 0%,
+			rgba(255, 255, 255, 0) 80%
 		);
-		border-radius: 0.75rem;
-		opacity: 0.2;
+		opacity: 0.6;
 		z-index: -1;
-		transition: opacity var(--transition-standard);
 	}
 
 	.search-button:hover {
 		filter: brightness(1.1);
-	}
-
-	.search-button:hover::before {
-		opacity: 0.4;
+		box-shadow: var(--shadow-lg), var(--glow-accent);
 	}
 
 	.search-button:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+		box-shadow: var(--shadow-md);
 	}
 
 	.loading-indicator {
@@ -590,7 +574,7 @@
 	}
 
 	.spinner {
-		animation: spin 1s linear infinite;
+		animation: spin 1.2s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
 		height: 1.25rem;
 		width: 1.25rem;
 	}
@@ -623,16 +607,6 @@
 			.option-container {
 				justify-content: flex-end;
 			}
-		}
-	}
-
-	/* Using modern CSS color features */
-	@supports (color: oklch(0% 0 0)) {
-		:root {
-			--color-blue-500: oklch(56.3% 0.2 263.8);
-			--color-blue-600: oklch(51.2% 0.226 265.3);
-			--color-cyan-500: oklch(80.5% 0.126 195.6);
-			--color-cyan-600: oklch(74.8% 0.143 196.4);
 		}
 	}
 </style>

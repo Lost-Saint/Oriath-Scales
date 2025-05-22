@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ItemChecker from '$lib/components/ItemChecker.svelte';
 	import LeagueSelector from '$lib/components/LeagueSelector.svelte';
+	import SEO from '$lib/components/Seo.svelte';
 	import Tip from '$lib/components/tip.svelte';
 
 	let selectedLeague = 'Dawn of the Hunt';
@@ -10,52 +11,247 @@
 	}
 </script>
 
-<LeagueSelector {selectedLeague} onLeagueChange={handleLeagueChange} />
+<SEO
+	league={selectedLeague}
+	title="Tome of Trade - PoE2 Item Checker for {selectedLeague}"
+	description="Copy and paste Path of Exile 2 items to search the official trade website. Currently supporting {selectedLeague} league items." />
 
-<section class="full-width section-padding">
+<section class="full-width flow">
+	<div class="title-wrapper">
+		<div class="title-content">
+			<h1>Tome of Trade</h1>
+			<p class="subtitle">PoE2 Item Checker</p>
+		</div>
+	</div>
+
+	<LeagueSelector {selectedLeague} onLeagueChange={handleLeagueChange} />
+
 	<div class="content-wrapper">
-		<ItemChecker league={selectedLeague} />
-		<Tip />
+		<div class="main-content">
+			<ItemChecker league={selectedLeague} />
+		</div>
+		<div class="sidebar">
+			<Tip />
+		</div>
 	</div>
 </section>
 
-<section class="full-width section-padding">
-	<a href="/">
-		<svg height="24" width="24" viewBox="0 0 16 16" class="fill-current">
-			<path
-				d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
-			</path>
-		</svg>
-		View on GitHub
-	</a>
-	<a href="/">
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			width="24"
-			height="24"
-			viewBox="0 0 24 24"
-			role="img"
-			class="fill-current">
-			<path
-				d="m20.216 6.415-.132-.666c-.119-.598-.388-1.163-1.001-1.379-.197-.069-.42-.098-.57-.241-.152-.143-.196-.366-.231-.572-.065-.378-.125-.756-.192-1.133-.057-.325-.102-.69-.25-.987-.195-.4-.597-.634-.996-.788a5.723 5.723 0 0 0-.626-.194c-1-.263-2.05-.36-3.077-.416a25.834 25.834 0 0 0-3.7.062c-.915.083-1.88.184-2.75.5-.318.116-.646.256-.888.501-.297.302-.393.77-.177 1.146.154.267.415.456.692.58.36.162.737.284 1.123.366 1.075.238 2.189.331 3.287.37 1.218.05 2.437.01 3.65-.118.299-.033.598-.073.896-.119.352-.054.578-.513.474-.834-.124-.383-.457-.531-.834-.473-.466.074-.96.108-1.382.146-1.177.08-2.358.082-3.536.006a22.228 22.228 0 0 1-1.157-.107c-.086-.01-.18-.025-.258-.036-.243-.036-.484-.08-.724-.13-.111-.027-.111-.185 0-.212h.005c.277-.06.557-.108.838-.147h.002c.131-.009.263-.032.394-.048a25.076 25.076 0 0 1 3.426-.12c.674.019 1.347.067 2.017.144l.228.031c.267.04.533.088.798.145.392.085.895.113 1.07.542.055.137.08.288.111.431l.319 1.484a.237.237 0 0 1-.199.284h-.003c-.037.006-.075.01-.112.015a36.704 36.704 0 0 1-4.743.295 37.059 37.059 0 0 1-4.699-.304c-.14-.017-.293-.042-.417-.06-.326-.048-.649-.108-.973-.161-.393-.065-.768-.032-1.123.161-.29.16-.527.404-.675.701-.154.316-.199.66-.267 1-.069.34-.176.707-.135 1.056.087.753.613 1.365 1.37 1.502a39.69 39.69 0 0 0 11.343.376.483.483 0 0 1 .535.53l-.071.697-1.018 9.907c-.041.41-.047.832-.125 1.237-.122.637-.553 1.028-1.182 1.171-.577.131-1.165.2-1.756.205-.656.004-1.31-.025-1.966-.022-.699.004-1.556-.06-2.095-.58-.475-.458-.54-1.174-.605-1.793l-.731-7.013-.322-3.094c-.037-.351-.286-.695-.678-.678-.336.015-.718.3-.678.679l.228 2.185.949 9.112c.147 1.344 1.174 2.068 2.446 2.272.742.12 1.503.144 2.257.156.966.016 1.942.053 2.892-.122 1.408-.258 2.465-1.198 2.616-2.657.34-3.332.683-6.663 1.024-9.995l.215-2.087a.484.484 0 0 1 .39-.426c.402-.078.787-.212 1.074-.518.455-.488.546-1.124.385-1.766zm-1.478.772c-.145.137-.363.201-.578.233-2.416.359-4.866.54-7.308.46-1.748-.06-3.477-.254-5.207-.498-.17-.024-.353-.055-.47-.18-.22-.236-.111-.71-.054-.995.052-.26.152-.609.463-.646.484-.057 1.046.148 1.526.22.577.088 1.156.159 1.737.212 2.48.226 5.002.19 7.472-.14.45-.06.899-.13 1.345-.21.399-.072.84-.206 1.08.206.166.281.188.657.162.974a.544.544 0 0 1-.169.364zm-6.159 3.9c-.862.37-1.84.788-3.109.788a5.884 5.884 0 0 1-1.569-.217l.877 9.004c.065.78.717 1.38 1.5 1.38 0 0 1.243.065 1.658.065.447 0 1.786-.065 1.786-.065.783 0 1.434-.6 1.499-1.38l.94-9.95a3.996 3.996 0 0 0-1.322-.238c-.826 0-1.491.284-2.26.613z">
-			</path>
-		</svg>
-		Buy Me a Coffee
-	</a>
+<section class="full-width section-padding footer-section">
+	<div class="links-wrapper">
+		<div class="links-content">
+			<p class="links-label">Support the project</p>
+			<div class="links-buttons">
+				<a class="link-github" href="/" aria-label="View source code on GitHub">
+					<svg height="24" width="24" viewBox="0 0 16 16" class="fill-current">
+						<path
+							d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+						></path>
+					</svg>
+					<span>GitHub</span>
+				</a>
+				<a
+					class="link-coffee"
+					href="/"
+					aria-label="Support with a coffee donation">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						role="img"
+						class="fill-current">
+						<path
+							d="m20.216 6.415-.132-.666c-.119-.598-.388-1.163-1.001-1.379-.197-.069-.42-.098-.57-.241-.152-.143-.196-.366-.231-.572-.065-.378-.125-.756-.192-1.133-.057-.325-.102-.69-.25-.987-.195-.4-.597-.634-.996-.788a5.723 5.723 0 0 0-.626-.194c-1-.263-2.05-.36-3.077-.416a25.834 25.834 0 0 0-3.7.062c-.915.083-1.88.184-2.75.5-.318.116-.646.256-.888.501-.297.302-.393.77-.177 1.146.154.267.415.456.692.58.36.162.737.284 1.123.366 1.075.238 2.189.331 3.287.37 1.218.05 2.437.01 3.65-.118.299-.033.598-.073.896-.119.352-.054.578-.513.474-.834-.124-.383-.457-.531-.834-.473-.466.074-.96.108-1.382.146-1.177.08-2.358.082-3.536.006a22.228 22.228 0 0 1-1.157-.107c-.086-.01-.18-.025-.258-.036-.243-.036-.484-.08-.724-.13-.111-.027-.111-.185 0-.212h.005c.277-.06.557-.108.838-.147h.002c.131-.009.263-.032.394-.048a25.076 25.076 0 0 1 3.426-.12c.674.019 1.347.067 2.017.144l.228.031c.267.04.533.088.798.145.392.085.895.113 1.07.542.055.137.08.288.111.431l.319 1.484a.237.237 0 0 1-.199.284h-.003c-.037.006-.075.01-.112.015a36.704 36.704 0 0 1-4.743.295 37.059 37.059 0 0 1-4.699-.304c-.14-.017-.293-.042-.417-.06-.326-.048-.649-.108-.973-.161-.393-.065-.768-.032-1.123.161-.29.16-.527.404-.675.701-.154.316-.199.66-.267 1-.069.34-.176.707-.135 1.056.087.753.613 1.365 1.37 1.502a39.69 39.69 0 0 0 11.343.376.483.483 0 0 1 .535.53l-.071.697-1.018 9.907c-.041.41-.047.832-.125 1.237-.122.637-.553 1.028-1.182 1.171-.577.131-1.165.2-1.756.205-.656.004-1.31-.025-1.966-.022-.699.004-1.556-.06-2.095-.58-.475-.458-.54-1.174-.605-1.793l-.731-7.013-.322-3.094c-.037-.351-.286-.695-.678-.678-.336.015-.718.3-.678.679l.228 2.185.949 9.112c.147 1.344 1.174 2.068 2.446 2.272.742.12 1.503.144 2.257.156.966.016 1.942.053 2.892-.122 1.408-.258 2.465-1.198 2.616-2.657.34-3.332.683-6.663 1.024-9.995l.215-2.087a.484.484 0 0 1 .39-.426c.402-.078.787-.212 1.074-.518.455-.488.546-1.124.385-1.766zm-1.478.772c-.145.137-.363.201-.578.233-2.416.359-4.866.54-7.308.46-1.748-.06-3.477-.254-5.207-.498-.17-.024-.353-.055-.47-.18-.22-.236-.111-.71-.054-.995.052-.26.152-.609.463-.646.484-.057 1.046.148 1.526.22.577.088 1.156.159 1.737.212 2.48.226 5.002.19 7.472-.14.45-.06.899-.13 1.345-.21.399-.072.84-.206 1.08.206.166.281.188.657.162.974a.544.544 0 0 1-.169.364zm-6.159 3.9c-.862.37-1.84.788-3.109.788a5.884 5.884 0 0 1-1.569-.217l.877 9.004c.065.78.717 1.38 1.5 1.38 0 0 1.243.065 1.658.065.447 0 1.786-.065 1.786-.065.783 0 1.434-.6 1.499-1.38l.94-9.95a3.996 3.996 0 0 0-1.322-.238c-.826 0-1.491.284-2.26.613z"
+						></path>
+					</svg>
+					<span>Buy Me a Coffee</span>
+				</a>
+			</div>
+		</div>
+	</div>
 </section>
 
 <style>
+	/* Title Section Improvements */
+	.title-wrapper {
+		text-align: center;
+		padding: 60px 0 40px 0;
+	}
+
+	.title-content h1 {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		margin-bottom: 0.5rem;
+		font-family: var(--font-primary);
+		color: var(--text-primary);
+		font-size: 2.5rem;
+		font-weight: 700;
+	}
+
+	.title-icon {
+		color: var(--text-accent);
+		flex-shrink: 0;
+	}
+
+	.subtitle {
+		color: var(--text-secondary);
+		font-family: var(--font-secondary);
+		font-size: 1.25rem;
+		margin-bottom: 0.5rem;
+		font-weight: 500;
+	}
+
+	.description {
+		color: var(--text-secondary);
+		font-family: var(--font-secondary);
+		font-size: 1rem;
+		max-width: 500px;
+		margin: 0 auto;
+		opacity: 0.8;
+	}
+
+	/* League Section */
+	.league-section {
+		padding: 2rem 0;
+		display: flex;
+		justify-content: center;
+		background: var(--ui-element-bg);
+		border-bottom: 1px solid var(--ui-border);
+	}
+
+	/* Content Layout */
 	.content-wrapper {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: 2rem;
+		padding: 2rem 0;
+		min-height: 60vh;
 	}
 
-	@media (min-width: 640px) {
+	.main-content {
+		flex: 1;
+	}
+
+	/* Footer Section */
+	.footer-section {
+		background: var(--ui-element-bg);
+		border-top: 1px solid var(--ui-border);
+		margin-top: auto;
+	}
+
+	.links-wrapper {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.links-content {
+		text-align: center;
+	}
+
+	.links-label {
+		color: var(--text-secondary);
+		font-family: var(--font-secondary);
+		font-size: 0.875rem;
+		margin-bottom: 1rem;
+		font-weight: 500;
+	}
+
+	.links-buttons {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+	}
+
+	/* Link Buttons */
+	.links-buttons a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
+		border-radius: 8px;
+		font-family: var(--font-secondary);
+		font-weight: 500;
+		text-decoration: none;
+		transition: all 0.3s ease;
+		font-size: 0.875rem;
+		border: 2px solid transparent;
+	}
+
+	.link-github {
+		background-color: var(--text-primary);
+		color: var(--primary-dark);
+	}
+
+	.link-github:hover {
+		background-color: var(--text-secondary);
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(233, 233, 233, 0.2);
+	}
+
+	.link-coffee {
+		background-color: var(--text-accent);
+		color: var(--primary-dark);
+	}
+
+	.link-coffee:hover {
+		background-color: #ffa726;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(255, 183, 77, 0.3);
+	}
+
+	/* Responsive Design */
+	@media (min-width: 768px) {
 		.content-wrapper {
 			flex-direction: row;
 			align-items: flex-start;
-			gap: 2rem;
+			gap: 3rem;
+		}
+
+		.main-content {
+			flex: 2;
+		}
+
+		.sidebar {
+			flex: 1;
+			position: sticky;
+			top: 2rem;
+		}
+
+		.title-content h1 {
+			font-size: 3rem;
+		}
+
+		.links-buttons {
+			gap: 1.5rem;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.title-content h1 {
+			font-size: 2rem;
+			flex-direction: column;
+			gap: 0.5rem;
+		}
+
+		.links-buttons {
+			flex-direction: column;
+			gap: 0.75rem;
+		}
+
+		.links-buttons a {
+			justify-content: center;
+			width: 100%;
+			max-width: 200px;
+		}
+	}
+
+	/* Animation for better UX */
+	@media (prefers-reduced-motion: no-preference) {
+		.links-buttons a {
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		}
 	}
 </style>

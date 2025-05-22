@@ -1,24 +1,89 @@
 :root {
-	--font-family: ui-sans-serif, system-ui, -apple-system, BlinkMackSystemFont, "Segoe UI", Roboto, sans-serif;
+	/* Primary Colors */
+	--primary-dark: #0d1117;
+	--primary-bg: #161b22;
+	--primary-accent: #d17b46;
+	--primary-hover: #e8945b;
+	--primary-gradient: linear-gradient(to right,
+			var(--primary-accent),
+			#c95d28);
 
-	--fs-300: clamp(0.94rem, calc(0.92rem + 0.08vw), 0.98rem);
-	--fs-400: clamp(1.13rem, calc(1.06rem + 0.33vw), 1.31rem);
-	--fs-500: clamp(1.35rem, calc(1.21rem + 0.69vw), 1.75rem);
-	--fs-600: clamp(1.62rem, calc(1.37rem + 1.24vw), 2.33rem);
-	--fs-700: clamp(1.94rem, calc(1.54rem + 2.03vw), 3.11rem);
-	--fs-800: clamp(2.33rem, calc(1.7rem + 3.15vw), 4.14rem);
-	--fs-900: clamp(2.8rem, calc(1.85rem + 4.74vw), 5.52rem);
+	/* Text Colors */
+	--text-primary: #e6e6e6;
+	--text-secondary: #a7b1c2;
+	--text-accent: #ffb74d;
 
-	--clr-primary-300: hsl(219, 76%, 55%);
-	--clr-primary-400: hsl(219, 76%, 40%);
-	--clr-primary-500: hsl(219, 76%, 25%);
-	--clr-secondary-300: hsl(269, 75%, 55%);
-	--clr-secondary-400: hsl(269, 75%, 40%);
-	--clr-secondary-500: hsl(269, 75%, 25%);
-	--clr-accent-200: hsl(358, 85%, 80%);
-	--clr-accent-300: hsl(358, 72%, 65%);
-	--clr-accent-400: hsl(358, 72%, 50%);
-	--clr-accent-500: hsl(358, 72%, 35%);
+	/* UI Elements */
+	--ui-border: #30363d;
+	--ui-element-bg: #1a1f2a;
+	--ui-hover-bg: #252c37;
+	--ui-active-bg: #2d3748;
+	--ui-success: #4ac267;
+	--ui-error-bg: rgba(155, 28, 28, 0.2);
+	--ui-error-border: rgba(239, 68, 68, 0.2);
+	--ui-error-text: #f87171;
+	--ui-toggle-bg: rgba(255, 255, 255, 0.1);
+
+
+
+	/* ===== Font Sizes - Using clamp for responsive scaling ===== */
+	/* Naming convention: --fs-{size} where size is increasing number from smallest to largest */
+	--fs-xs: clamp(0.75rem, calc(0.73rem + 0.06vw), 0.8rem);
+	/* Extra small text, footnotes */
+	--fs-sm: clamp(0.875rem, calc(0.84rem + 0.17vw), 0.98rem);
+	/* Small text, secondary info */
+	--fs-base: clamp(1rem, calc(0.96rem + 0.21vw), 1.125rem);
+	/* Base body text */
+	--fs-md: clamp(1.125rem, calc(1.08rem + 0.25vw), 1.25rem);
+	/* Medium text, important info */
+	--fs-lg: clamp(1.25rem, calc(1.2rem + 0.29vw), 1.4rem);
+	/* Large text, subtitles */
+	--fs-xl: clamp(1.5rem, calc(1.37rem + 0.62vw), 1.85rem);
+	/* Extra large, headings */
+	--fs-2xl: clamp(1.875rem, calc(1.7rem + 0.85vw), 2.35rem);
+	/* 2X Large, major headings */
+	--fs-3xl: clamp(2.25rem, calc(2rem + 1.2vw), 2.9rem);
+	/* 3X Large, page titles */
+
+	/* ===== Line Heights ===== */
+	--lh-tight: 1.1;
+	/* For headings */
+	--lh-snug: 1.3;
+	/* For subheadings */
+	--lh-normal: 1.5;
+	/* For most text */
+	--lh-relaxed: 1.7;
+	/* For body text */
+	--lh-loose: 2;
+	/* For spaced content */
+
+	/* ===== Font Weights ===== */
+	--fw-light: 300;
+	--fw-normal: 400;
+	--fw-medium: 500;
+	--fw-semibold: 600;
+	--fw-bold: 700;
+
+	/* ===== Letter Spacing ===== */
+	--ls-tight: -0.01em;
+	--ls-normal: 0;
+	--ls-wide: 0.02em;
+	--ls-wider: 0.05em;
+
+	/* Effects */
+	--transition-standard: 250ms ease;
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+	--shadow-md:
+		0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	--shadow-lg:
+		0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+	--glow-accent: 0 0 15px rgba(209, 123, 70, 0.3);
+
+	/* Font Settings */
+	--font-primary: 'Alegreya', 'Crimson Text', serif;
+	--font-secondary: 'Roboto Condensed', 'Open Sans Condensed', 'Noto Sans', sans-serif;
+	--font-mono: 'Menlo', 'Monaco', 'Consolas', monospace;
+
 }
 
 .separator {
