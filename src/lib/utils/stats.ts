@@ -2,59 +2,13 @@
  * Stats utility module for managing POE stats data
  *
  * Provides functionality to fetch, cache, normalize, and search game stats
- * with efficient fuzzy matching capabilities.
+ * with efficient fuzzy matching capabilities and implicit stats support.
  */
 
 import { browser } from '$app/environment';
+import type { StatApiResponse, StatOption, StatEntry, StatGroup, SearchResult, SearchContext } from '$lib/types/utils';
 import { tryCatch } from '$lib/utils/error';
 import Fuse from 'fuse.js';
-
-// Types
-// ------------------------------------
-
-/**
- * API response type for stat groups
- */
-interface StatApiResponse {
-	result?: StatGroup[];
-	error?: string;
-}
-
-/**
- * Represents an individual stat option with metadata
- */
-export interface StatOption {
-	id: string;
-	text: string;
-	type: string;
-	option?: Record<string, unknown>;
-}
-
-/**
- * Raw stat entry from API
- */
-interface StatEntry {
-	id: string;
-	text: string;
-	option?: Record<string, unknown>;
-}
-
-/**
- * Group of related stats from API
- */
-interface StatGroup {
-	label: string;
-	entries: StatEntry[];
-}
-
-/**
- * Search result with additional metadata
- */
-interface SearchResult {
-	id: string | null;
-	exactMatch: boolean;
-	score?: number;
-}
 
 // Configuration
 // ------------------------------------
@@ -64,7 +18,9 @@ const CONFIG = {
 	SEARCH_THRESHOLD: 0.8,
 	SEARCH_DISTANCE: 300,
 	MIN_MATCH_LENGTH: 2,
-	STATS_ENDPOINT: '/api/poe/stats'
+	STATS_ENDPOINT: '/api/poe/stats',
+	IMPLICIT_INDICATORS: ['(implicit)'],
+	IMPLICIT_TYPE: 'Implicit'
 };
 
 // State management
@@ -76,6 +32,7 @@ const CONFIG = {
 class StatsManager {
 	private cache: StatOption[] | null = null;
 	private searchIndex: Fuse<StatOption> | null = null;
+	private implicitIndex: Fuse<StatOption> | null = null;
 	private lastFetchTime = 0;
 	private fetchPromise: Promise<StatOption[]> | null = null;
 
@@ -92,6 +49,7 @@ class StatsManager {
 	clearCache(): void {
 		this.cache = null;
 		this.searchIndex = null;
+		this.implicitIndex = null;
 		this.lastFetchTime = 0;
 		this.fetchPromise = null;
 	}
@@ -100,7 +58,7 @@ class StatsManager {
 	 * Checks if cache is ready to use
 	 */
 	isCacheReady(): boolean {
-		return !!(this.cache && this.searchIndex);
+		return !!(this.cache && this.searchIndex && this.implicitIndex);
 	}
 
 	/**
@@ -109,6 +67,7 @@ class StatsManager {
 	updateCache(stats: StatOption[]): void {
 		this.cache = stats;
 		this.searchIndex = this.createSearchIndex(stats);
+		this.implicitIndex = this.createImplicitIndex(stats);
 	}
 
 	/**
@@ -135,7 +94,7 @@ class StatsManager {
 	}
 
 	/**
-	 * Creates Fuse.js search index for stats data
+	 * Creates Fuse.js search index for all stats
 	 */
 	private createSearchIndex(stats: StatOption[]): Fuse<StatOption> {
 		return new Fuse(stats, {
@@ -160,21 +119,83 @@ class StatsManager {
 	}
 
 	/**
-	 * Performs stat search using the search index
+	 * Creates dedicated Fuse.js search index for implicit stats only
 	 */
-	searchStats(term: string): SearchResult {
-		if (!this.searchIndex || !this.cache) {
+	private createImplicitIndex(stats: StatOption[]): Fuse<StatOption> {
+		const implicitStats = stats.filter(stat => stat.type === CONFIG.IMPLICIT_TYPE);
+		
+		return new Fuse(implicitStats, {
+			keys: ['text'],
+			includeScore: true,
+			threshold: CONFIG.SEARCH_THRESHOLD,
+			distance: CONFIG.SEARCH_DISTANCE,
+			ignoreLocation: true,
+			minMatchCharLength: CONFIG.MIN_MATCH_LENGTH,
+			useExtendedSearch: true,
+			getFn: (obj, path) => {
+				const value = obj[path as keyof StatOption];
+				if (path === 'text' && typeof value === 'string') {
+					return normalizeStatText(value);
+				}
+				if (typeof value === 'string' || typeof value === 'number') {
+					return value;
+				}
+				return '';
+			}
+		});
+	}
+
+	/**
+	 * Analyzes search input to determine context and filtering needs
+	 */
+	private analyzeSearchContext(statText: string): SearchContext {
+		const lowerText = statText.toLowerCase();
+		const isImplicitOnly = CONFIG.IMPLICIT_INDICATORS.some(indicator => 
+			lowerText.includes(indicator)
+		);
+
+		// Clean the search term by removing implicit indicators
+		let cleanedText = statText;
+		for (const indicator of CONFIG.IMPLICIT_INDICATORS) {
+			cleanedText = cleanedText.replace(new RegExp(`\\s*\\(${indicator}\\)`, 'gi'), '');
+			cleanedText = cleanedText.replace(new RegExp(`\\s*${indicator}\\s*`, 'gi'), ' ');
+		}
+
+		const normalizedTerm = normalizeStatText(cleanedText);
+
+		return {
+			searchTerm: cleanedText.trim(),
+			normalizedTerm,
+			isImplicitOnly,
+			originalText: statText
+		};
+	}
+
+	/**
+	 * Performs stat search using appropriate search index
+	 */
+	searchStats(statText: string): SearchResult {
+		if (!this.cache || !this.searchIndex || !this.implicitIndex) {
 			return { id: null, exactMatch: false };
 		}
 
+		const context = this.analyzeSearchContext(statText);
+		
+		// Choose appropriate dataset and search index
+		const relevantStats = context.isImplicitOnly 
+			? this.cache.filter(s => s.type === CONFIG.IMPLICIT_TYPE)
+			: this.cache;
+			
+		const searchIndex = context.isImplicitOnly ? this.implicitIndex : this.searchIndex;
+
 		// Try exact match first
-		const exactMatch = this.findExactMatch(term);
+		const exactMatch = this.findExactMatch(context.normalizedTerm, relevantStats);
 		if (exactMatch) {
 			return { id: exactMatch, exactMatch: true };
 		}
 
 		// Fall back to fuzzy search
-		const results = this.searchIndex.search(term);
+		const results = searchIndex.search(context.normalizedTerm);
 
 		if (results.length === 0) {
 			return { id: null, exactMatch: false };
@@ -197,12 +218,10 @@ class StatsManager {
 	}
 
 	/**
-	 * Finds exact match after normalization
+	 * Finds exact match after normalization within specified stats
 	 */
-	private findExactMatch(normalizedInput: string): string | null {
-		if (!this.cache) return null;
-
-		const exactMatch = this.cache.find(
+	private findExactMatch(normalizedInput: string, stats: StatOption[]): string | null {
+		const exactMatch = stats.find(
 			(s) => normalizeStatText(s.text) === normalizedInput
 		);
 
@@ -219,8 +238,8 @@ const statsManager = new StatsManager();
 /**
  * Normalizes stat text for consistent matching
  *
- * Removes or replaces special characters, numbers, and common prefixes
- * to improve fuzzy matching accuracy.
+ * Removes or replaces special characters, numbers, common prefixes,
+ * and implicit indicators to improve fuzzy matching accuracy.
  */
 export function normalizeStatText(text: string): string {
 	if (!text) return '';
@@ -235,6 +254,7 @@ export function normalizeStatText(text: string): string {
 		.replace(/^adds /, '') // Remove common prefixes
 		.replace(/^gain /, '')
 		.replace(/^you /, '')
+		.replace(/\s*\(implicit\)\s*$/i, '') // Remove (implicit) suffix
 		.trim();
 }
 
@@ -371,9 +391,11 @@ function flattenApiResponse(groups: StatGroup[]): StatOption[] {
 /**
  * Finds a stat ID based on text input using fuzzy matching
  *
+ * Supports both regular stats and implicit-only searches. When input contains
+ * "(implicit)" or "implicit", it will only search within implicit stats.
  * First attempts exact match after normalization, then falls back to fuzzy search.
  *
- * @param statText The stat text to search for
+ * @param statText The stat text to search for (may include implicit indicators)
  * @returns The matching stat ID or null if no match found
  */
 export function findStatId(statText: string): string | null {
@@ -390,11 +412,8 @@ export function findStatId(statText: string): string | null {
 		return null;
 	}
 
-	const normalizedInput = normalizeStatText(statText);
-	if (!normalizedInput) return null;
-
-	// Perform search (both exact and fuzzy)
-	const result = statsManager.searchStats(normalizedInput);
+	// Perform context-aware search
+	const result = statsManager.searchStats(statText);
 	return result.id;
 }
 
@@ -425,6 +444,29 @@ export function clearStatsCache(): void {
  */
 export function getCachedStats(): StatOption[] | null {
 	return statsManager.getCachedStats();
+}
+
+/**
+ * Gets only implicit stats from cache
+ * Returns null if cache is not initialized
+ */
+export function getCachedImplicitStats(): StatOption[] | null {
+	const stats = statsManager.getCachedStats();
+	return stats ? stats.filter(s => s.type === CONFIG.IMPLICIT_TYPE) : null;
+}
+
+/**
+ * Checks if a given stat text indicates implicit-only search
+ * 
+ * @param statText The stat text to analyze
+ * @returns True if the text contains implicit indicators
+ */
+export function isImplicitSearch(statText: string): boolean {
+	if (!statText) return false;
+	const lowerText = statText.toLowerCase();
+	return CONFIG.IMPLICIT_INDICATORS.some(indicator => 
+		lowerText.includes(indicator)
+	);
 }
 
 /**
