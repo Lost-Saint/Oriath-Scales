@@ -2,58 +2,42 @@ import type { TradeApiResponse, TradeSearchRequest } from '$lib/types/trade';
 import { tryCatch } from '$lib/utils/error';
 
 /**
- * Handles interactions with the Path of Exile Trade API
+ * Path of Exile Trade API Client
+ *
+ * Handles trade search requests to the official Path of Exile API
+ * with configurable proxy support and comprehensive error handling.
  */
 export class TradeApiService {
-	private readonly baseUrl: string;
-	private readonly headers: Record<string, string>;
+	private readonly baseUrl =
+		import.meta.env.VITE_POE_PROXY_URL || 'https://www.pathofexile.com';
+	private readonly headers = {
+		'Content-Type': 'application/json',
+		'User-Agent':
+			'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
+		Accept: '*/*'
+	};
 
 	/**
-	 * Creates a new trade API service
-	 */
-	constructor() {
-		this.baseUrl =
-			import.meta.env.VITE_POE_PROXY_URL || 'https://www.pathofexile.com';
-		this.headers = {
-			'Content-Type': 'application/json',
-			'User-Agent':
-				'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
-			Accept: '*/*'
-		};
-	}
-
-	/**
-	 * Get the base URL for POE API requests
+	 * Get the configured base URL for API requests
 	 */
 	getBaseUrl(): string {
 		return this.baseUrl;
 	}
 
 	/**
-	 * Build the full API URL for a trade search
+	 * Performs a trade search request
 	 *
-	 * @param league - The PoE league to search in
-	 * @returns Complete trade search URL
-	 */
-	private buildSearchUrl(league: string): string {
-		return `${this.baseUrl}/api/trade2/search/${encodeURIComponent(league)}`;
-	}
-
-	/**
-	 * Performs a trade search request to the Path of Exile API
-	 *
-	 * @param request - Search request containing league and query
-	 * @returns Object containing both response and parsed data
-	 * @throws Error on connection failure or invalid response
+	 * @param request Search request with league and query parameters
+	 * @returns Promise resolving to response and parsed data
+	 * @throws Error for connection or parsing failures
 	 */
 	async search(request: TradeSearchRequest): Promise<{
 		response: Response;
 		data: TradeApiResponse;
 	}> {
-		const url = this.buildSearchUrl(request.league);
+		const url = `${this.baseUrl}/api/trade2/search/${encodeURIComponent(request.league)}`;
 
-		// Make the API request
-		const fetchResult = await tryCatch(
+		const result = await tryCatch(
 			fetch(url, {
 				method: 'POST',
 				headers: this.headers,
@@ -61,20 +45,12 @@ export class TradeApiService {
 			})
 		);
 
-		// Handle connection errors
-		if (fetchResult.error) {
-			throw new Error(
-				`Failed to connect to PoE API: ${
-					fetchResult.error instanceof Error
-						? fetchResult.error.message
-						: String(fetchResult.error)
-				}`
-			);
+		if (result.error) {
+			throw new Error(`Failed to connect to PoE API: ${result.error.message}`);
 		}
 
-		const response = fetchResult.data;
+		const response = result.data;
 
-		// For non-OK responses, return early to let caller handle the specific status
 		if (!response.ok) {
 			return {
 				response,
@@ -82,16 +58,12 @@ export class TradeApiService {
 			};
 		}
 
-		// Parse the JSON response
-		const jsonResult = await tryCatch(response.json());
-
-		if (jsonResult.error) {
-			throw new Error(`Failed to parse API response: ${jsonResult.error}`);
+		const json = await tryCatch(response.json());
+		if (json.error) {
+			throw new Error(`Failed to parse API response: ${json.error.message}`);
 		}
 
-		// Validate response structure
-		const data = jsonResult.data as TradeApiResponse;
-
+		const data = json.data as TradeApiResponse;
 		if (!data.id) {
 			throw new Error('Invalid API response: missing search ID');
 		}
@@ -100,5 +72,5 @@ export class TradeApiService {
 	}
 }
 
-// Create and export a singleton instance
+// Singleton instance
 export const tradeApiService = new TradeApiService();

@@ -2,56 +2,43 @@ import type { StatsResult } from '$lib/types/stats';
 import { tryCatch } from '$lib/utils/error';
 
 /**
- * Manages communication with the Path of Exile stats API
+ * Path of Exile Stats API Client
+ *
+ * Handles communication with the official Path of Exile trade API
+ * to fetch game statistics data with proper error handling and validation.
  */
 export class StatsApi {
 	private readonly apiUrl = 'https://www.pathofexile.com/api/trade2/data/stats';
-	private readonly headers: Record<string, string>;
+	private readonly headers = {
+		'User-Agent':
+			'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
+		Accept: 'application/json'
+	};
 
 	/**
-	 * Creates a new stats API service
-	 */
-	constructor() {
-		this.headers = {
-			'User-Agent':
-				'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
-			Accept: 'application/json'
-		};
-	}
-
-	/**
-	 * Fetches the complete stats data from the Path of Exile API
+	 * Fetches stats data from the Path of Exile API
 	 *
-	 * @returns A promise resolving to the stats data
-	 * @throws Error if the API request fails or returns invalid data
+	 * @returns Promise resolving to validated stats data
+	 * @throws Error for network, parsing, or validation failures
 	 */
 	async fetchStats(): Promise<StatsResult> {
-		// Make the API request
-		const fetchResult = await tryCatch(
+		const response = await tryCatch(
 			fetch(this.apiUrl, { headers: this.headers })
 		);
 
-		// Handle connection errors
-		if (fetchResult.error || !fetchResult.data.ok) {
-			const errorMessage = fetchResult.error
-				? `Connection error: ${fetchResult.error.message}`
-				: `API error: ${fetchResult.data?.status} ${fetchResult.data?.statusText}`;
-
-			throw new Error(`Failed to fetch PoE stats: ${errorMessage}`);
+		if (response.error || !response.data.ok) {
+			const message = response.error
+				? `Connection error: ${response.error.message}`
+				: `API error: ${response.data?.status} ${response.data?.statusText}`;
+			throw new Error(`Failed to fetch PoE stats: ${message}`);
 		}
 
-		// Parse the JSON response
-		const jsonResult = await tryCatch(fetchResult.data.json());
-
-		if (jsonResult.error) {
-			throw new Error(
-				`Failed to parse stats response: ${jsonResult.error.message}`
-			);
+		const json = await tryCatch(response.data.json());
+		if (json.error) {
+			throw new Error(`Failed to parse stats response: ${json.error.message}`);
 		}
 
-		// Validate response structure
-		const data = jsonResult.data as StatsResult;
-
+		const data = json.data as StatsResult;
 		if (!Array.isArray(data.result)) {
 			throw new Error(
 				'Invalid API response: missing or invalid "result" array'
@@ -62,5 +49,5 @@ export class StatsApi {
 	}
 }
 
-// Create and export a singleton instance
+// Singleton instance
 export const statsApi = new StatsApi();
