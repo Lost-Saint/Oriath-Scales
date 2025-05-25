@@ -44,6 +44,8 @@
 				<a
 					class="link-github"
 					href="https://github.com/Lost-Saint"
+					target="_blank"
+					rel="noopener noreferrer"
 					aria-label="View source code on GitHub">
 					<svg height="24" width="24" viewBox="0 0 16 16" class="fill-current">
 						<path
@@ -55,6 +57,8 @@
 				<a
 					class="link-coffee"
 					href="https://buymeacoffee.com/lost.saint"
+					target="_blank"
+					rel="noopener noreferrer"
 					aria-label="Support with a coffee donation">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
