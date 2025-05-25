@@ -379,9 +379,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		backdrop-filter: blur(8px);
 		border-radius: 0.75rem;
-		box-shadow: var(--shadow-lg);
 		width: 100%;
 		font-family: var(--font-secondary);
 		color: var(--text-primary);

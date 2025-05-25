@@ -8,7 +8,7 @@
 		'Copy and paste Path of Exile 2 items to instantly search the official trade website. Parse item stats, mods, and requirements with one click. Fast PoE2 trade tool.';
 	export let keywords =
 		'path of exile 2, poe2, item parser, trade search, copy paste items, poe2 trade, item stats, mods, trading tool, pathofexile.com/trade, dawn of the hunt';
-	export let image = '/tome-of-trade-og.jpg';
+	export let image = 'static/favicon.png';
 	export const league = '';
 	export let canonicalUrl = '';
 
@@ -86,10 +86,10 @@
 	<link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
 
 	<!-- Favicon and App Icons -->
-	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+	<!-- <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
 	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-	<link rel="manifest" href="/site.webmanifest" />
+	<link rel="manifest" href="/site.webmanifest" /> -->
 
 	<!-- Additional Gaming-Specific Meta Tags -->
 	<meta name="game" content="Path of Exile" />
