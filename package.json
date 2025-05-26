@@ -34,7 +34,7 @@
 		"prettier": "^3.5.3",
 		"prettier-plugin-organize-imports": "^4.1.0",
 		"prettier-plugin-svelte": "^3.4.0",
-		"svelte": "^5.33.1",
+		"svelte": "^5.33.2",
 		"svelte-check": "^4.2.1",
 		"svelte-eslint-parser": "^1.2.0",
 		"tsx": "^4.19.4",
