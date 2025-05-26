@@ -12,8 +12,13 @@ import type { RequestHandler } from './$types';
 export const POST = (async ({ request }) => {
 	// Step 1: Check rate limit before proceeding
 	const rateLimitResult = checkRateLimit();
+
 	if (!rateLimitResult.allowed) {
-		return rateLimitResult.response!;
+		// We know response exists when allowed is false
+		if (!rateLimitResult.response) {
+			throw new Error('Rate limit response not provided');
+		}
+		return rateLimitResult.response;
 	}
 
 	// Step 2: Parse the request body
@@ -56,9 +61,7 @@ function checkRateLimit(): { allowed: boolean; response?: Response } {
 	const rateLimitCheck = rateLimitService.checkLimit();
 
 	if (!rateLimitCheck.allowed) {
-		console.log(
-			`[Rate Limits] Request blocked - ${rateLimitService.getStatus()}`
-		);
+		console.log(`[Rate Limits] Request blocked - ${rateLimitService.getStatus()}`);
 
 		const errorResponse = createErrorResponse(
 			{
@@ -83,10 +86,7 @@ function checkRateLimit(): { allowed: boolean; response?: Response } {
  */
 async function parseRequestBody(
 	request: Request
-): Promise<
-	| { success: true; data: TradeSearchRequest }
-	| { success: false; response: Response }
-> {
+): Promise<{ success: true; data: TradeSearchRequest } | { success: false; response: Response }> {
 	const bodyResult = await tryCatch(request.json());
 
 	if (bodyResult.error) {

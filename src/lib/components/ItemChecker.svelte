@@ -89,8 +89,7 @@
 		}
 
 		if (!isStatsLoaded) {
-			error =
-				'Item stats database is not ready yet. Please try again in a moment.';
+			error = 'Item stats database is not ready yet. Please try again in a moment.';
 			return;
 		}
 
@@ -117,11 +116,7 @@
 
 			// Build the query based on item type
 			let query;
-			if (
-				parsedItem.rarity === 'Unique' &&
-				parsedItem.name &&
-				parsedItem.baseType
-			) {
+			if (parsedItem.rarity === 'Unique' && parsedItem.name && parsedItem.baseType) {
 				query = {
 					...baseQuery,
 					query: {
@@ -170,9 +165,7 @@
 							disabled: false
 						};
 					})
-					.filter(
-						(filter): filter is NonNullable<typeof filter> => filter !== null
-					);
+					.filter((filter): filter is NonNullable<typeof filter> => filter !== null);
 
 				if (statFilters.length === 0) {
 					error = 'No valid stats found to search for';
@@ -215,10 +208,10 @@
 
 			// Clean up undefined values
 			if (!parsedItem.itemClass) {
-				delete query.query.filters?.type_filters.filters.category;
+				delete query.query.filters.type_filters.filters.category;
 			}
 			if (!parsedItem.itemLevel || !includeItemLevel) {
-				delete query.query.filters?.type_filters.filters.ilvl;
+				delete query.query.filters.type_filters.filters.ilvl;
 			}
 
 			await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY));
@@ -234,9 +227,7 @@
 			if (!response.ok) {
 				const errorData: { error?: string } = await response.json();
 				if (response.status === 429) {
-					throw new Error(
-						'Too many requests. Please wait a moment and try again.'
-					);
+					throw new Error('Too many requests. Please wait a moment and try again.');
 				}
 				throw new Error(errorData.error || 'Search failed');
 			}
@@ -247,13 +238,8 @@
 			if (data.id) {
 				const tradeUrl = `https://www.pathofexile.com/trade2/search/${league}/${data.id}`;
 				const newWindow = window.open(tradeUrl, '_blank');
-				if (
-					!newWindow ||
-					newWindow.closed ||
-					typeof newWindow.closed === 'undefined'
-				) {
-					error =
-						'Popup was blocked. Please allow popups for this site and try again.';
+				if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+					error = 'Popup was blocked. Please allow popups for this site and try again.';
 					console.log('Trade URL:', tradeUrl);
 				}
 			} else {
@@ -325,8 +311,8 @@
 			bind:innerHTML={itemDisplayHtml}
 			on:paste={handlePaste}
 			on:input={handleInput}
-			spellcheck="false">
-		</div>
+			spellcheck="false"
+		></div>
 	</div>
 
 	{#if error}
@@ -336,9 +322,7 @@
 	{/if}
 
 	<div class="option-container">
-		<label for="includeItemLevel" class="option-label">
-			Include item level in search
-		</label>
+		<label for="includeItemLevel" class="option-label"> Include item level in search </label>
 		<button
 			role="switch"
 			id="includeItemLevel"
@@ -346,7 +330,8 @@
 			aria-labelledby="includeItemLevel-label"
 			on:click={() => (includeItemLevel = !includeItemLevel)}
 			class="toggle-switch"
-			class:active={includeItemLevel}>
+			class:active={includeItemLevel}
+		>
 			<span class="toggle-knob"></span>
 		</button>
 	</div>
@@ -355,16 +340,11 @@
 		{#if loading}
 			<div class="loading-indicator">
 				<svg class="spinner" viewBox="0 0 24 24">
-					<circle
-						cx="12"
-						cy="12"
-						r="10"
-						stroke="currentColor"
-						stroke-width="4"
-						fill="none" />
+					<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
 					<path
 						fill="currentColor"
-						d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+						d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+					/>
 				</svg>
 				Searching...
 			</div>

@@ -32,10 +32,7 @@ export const GET = (async () => {
 
 		if (cacheResult.data?.data) {
 			console.log('Using expired cache due to API failure');
-			return createSuccessResponse(
-				cacheResult.data.data,
-				FALLBACK_CACHE_DURATION
-			);
+			return createSuccessResponse(cacheResult.data.data, FALLBACK_CACHE_DURATION);
 		}
 
 		// No cache available and API failed, return error

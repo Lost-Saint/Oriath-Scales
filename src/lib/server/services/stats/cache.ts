@@ -54,9 +54,7 @@ export class StatsCache {
 			return null;
 		}
 
-		const parseResult = tryCatch<CacheData>(
-			() => JSON.parse(readResult.data) as CacheData
-		);
+		const parseResult = tryCatch<CacheData>(() => JSON.parse(readResult.data) as CacheData);
 
 		if (parseResult.error) {
 			console.error('Error parsing stats cache:', parseResult.error);

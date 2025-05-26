@@ -10,8 +10,7 @@ import { tryCatch } from '$lib/utils/error';
 export class StatsApi {
 	private readonly apiUrl = 'https://www.pathofexile.com/api/trade2/data/stats';
 	private readonly headers = {
-		'User-Agent':
-			'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
+		'User-Agent': 'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
 		Accept: 'application/json'
 	};
 
@@ -22,14 +21,12 @@ export class StatsApi {
 	 * @throws Error for network, parsing, or validation failures
 	 */
 	async fetchStats(): Promise<StatsResult> {
-		const response = await tryCatch(
-			fetch(this.apiUrl, { headers: this.headers })
-		);
+		const response = await tryCatch(fetch(this.apiUrl, { headers: this.headers }));
 
 		if (response.error || !response.data.ok) {
 			const message = response.error
 				? `Connection error: ${response.error.message}`
-				: `API error: ${response.data?.status} ${response.data?.statusText}`;
+				: `API error: ${response.data.status} ${response.data.statusText}`;
 			throw new Error(`Failed to fetch PoE stats: ${message}`);
 		}
 
@@ -40,9 +37,7 @@ export class StatsApi {
 
 		const data = json.data as StatsResult;
 		if (!Array.isArray(data.result)) {
-			throw new Error(
-				'Invalid API response: missing or invalid "result" array'
-			);
+			throw new Error('Invalid API response: missing or invalid "result" array');
 		}
 
 		return data;

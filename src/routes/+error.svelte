@@ -18,8 +18,8 @@
 			<h1>Not found!</h1>
 			<p>Blame the squirels!</p>
 			<p>
-				If you were expecting to find something here, please drop by the Discord
-				chatroom and let us know, or raise an issue on
+				If you were expecting to find something here, please drop by the Discord chatroom and let us
+				know, or raise an issue on
 				<a href="https://github.com/sveltejs/sites">GitHub</a>. Thanks!
 			</p>
 			<button type="button">
@@ -35,8 +35,8 @@
 			{/if}
 			<p>Please try reloading the page.</p>
 			<p>
-				If the error persists, please drop by the Discord chatroom and let us
-				know, or raise an issue on
+				If the error persists, please drop by the Discord chatroom and let us know, or raise an
+				issue on
 				<a href="https://github.com/sveltejs/sites">GitHub</a>. Thanks!
 			</p>
 		{/if}
@@ -48,8 +48,7 @@
 
 <style>
 	.container {
-		padding: var(--sk-page-padding-top) var(--sk-page-padding-side) 6rem
-			var(--sk-page-padding-side);
+		padding: var(--sk-page-padding-top) var(--sk-page-padding-side) 6rem var(--sk-page-padding-side);
 		height: 100%;
 	}
 	h1,

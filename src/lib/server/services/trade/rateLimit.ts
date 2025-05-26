@@ -1,8 +1,4 @@
-import type {
-	RateLimitCheck,
-	RateLimitState,
-	RateLimitTier
-} from '$lib/types/trade';
+import type { RateLimitCheck, RateLimitState, RateLimitTier } from '$lib/types/trade';
 
 /**
  * Manages API rate limiting for Path of Exile trade API
@@ -48,10 +44,7 @@ export class RateLimitService {
 	 * @returns Seconds until this tier resets
 	 */
 	private calculateTimeLeft(tier: RateLimitTier): number {
-		return Math.max(
-			0,
-			Math.ceil((this.state.lastReset + tier.period * 1000 - Date.now()) / 1000)
-		);
+		return Math.max(0, Math.ceil((this.state.lastReset + tier.period * 1000 - Date.now()) / 1000));
 	}
 
 	/**

@@ -66,9 +66,7 @@ class StatsManager {
 		return now - this.lastFetchTime >= CONFIG.CACHE_RETRY_INTERVAL;
 	}
 
-	setupFetchPromise(
-		fetchFn: () => Promise<StatOption[]>
-	): Promise<StatOption[]> {
+	setupFetchPromise(fetchFn: () => Promise<StatOption[]>): Promise<StatOption[]> {
 		if (!this.fetchPromise) {
 			this.lastFetchTime = Date.now();
 			this.fetchPromise = fetchFn().finally(() => {
@@ -101,9 +99,7 @@ class StatsManager {
 	}
 
 	private createImplicitIndex(stats: StatOption[]): Fuse<StatOption> {
-		const implicitStats = stats.filter(
-			(stat) => stat.type === CONFIG.IMPLICIT_TYPE
-		);
+		const implicitStats = stats.filter((stat) => stat.type === CONFIG.IMPLICIT_TYPE);
 
 		return new Fuse(implicitStats, {
 			keys: ['text'],
@@ -134,14 +130,8 @@ class StatsManager {
 
 		let cleanedText = statText;
 		for (const indicator of CONFIG.IMPLICIT_INDICATORS) {
-			cleanedText = cleanedText.replace(
-				new RegExp(`\\s*\\(${indicator}\\)`, 'gi'),
-				''
-			);
-			cleanedText = cleanedText.replace(
-				new RegExp(`\\s*${indicator}\\s*`, 'gi'),
-				' '
-			);
+			cleanedText = cleanedText.replace(new RegExp(`\\s*\\(${indicator}\\)`, 'gi'), '');
+			cleanedText = cleanedText.replace(new RegExp(`\\s*${indicator}\\s*`, 'gi'), ' ');
 		}
 
 		const normalizedTerm = normalizeStatText(cleanedText);
@@ -165,14 +155,9 @@ class StatsManager {
 			? this.cache.filter((s) => s.type === CONFIG.IMPLICIT_TYPE)
 			: this.cache;
 
-		const searchIndex = context.isImplicitOnly
-			? this.implicitIndex
-			: this.searchIndex;
+		const searchIndex = context.isImplicitOnly ? this.implicitIndex : this.searchIndex;
 
-		const exactMatch = this.findExactMatch(
-			context.normalizedTerm,
-			relevantStats
-		);
+		const exactMatch = this.findExactMatch(context.normalizedTerm, relevantStats);
 		if (exactMatch) {
 			return { id: exactMatch, exactMatch: true };
 		}
@@ -184,11 +169,7 @@ class StatsManager {
 		}
 
 		const bestMatch = results[0];
-		if (
-			bestMatch &&
-			bestMatch.score !== undefined &&
-			bestMatch.score < CONFIG.SEARCH_THRESHOLD
-		) {
+		if (bestMatch && bestMatch.score !== undefined && bestMatch.score < CONFIG.SEARCH_THRESHOLD) {
 			return {
 				id: bestMatch.item.id,
 				exactMatch: false,
@@ -199,13 +180,8 @@ class StatsManager {
 		return { id: null, exactMatch: false };
 	}
 
-	private findExactMatch(
-		normalizedInput: string,
-		stats: StatOption[]
-	): string | null {
-		const exactMatch = stats.find(
-			(s) => normalizeStatText(s.text) === normalizedInput
-		);
+	private findExactMatch(normalizedInput: string, stats: StatOption[]): string | null {
+		const exactMatch = stats.find((s) => normalizeStatText(s.text) === normalizedInput);
 
 		return exactMatch?.id || null;
 	}
@@ -269,16 +245,12 @@ export async function fetchStats(): Promise<StatOption[]> {
 }
 
 async function fetchStatsFromApi() {
-	const fetchResult = await tryCatch(
-		fetch(CONFIG.STATS_ENDPOINT, { cache: 'force-cache' })
-	);
+	const fetchResult = await tryCatch(fetch(CONFIG.STATS_ENDPOINT, { cache: 'force-cache' }));
 
 	if (fetchResult.error) {
 		return {
 			data: null,
-			error: new Error(
-				`Failed to connect to stats API: ${fetchResult.error.message}`
-			)
+			error: new Error(`Failed to connect to stats API: ${fetchResult.error.message}`)
 		};
 	}
 
@@ -294,9 +266,7 @@ async function fetchStatsFromApi() {
 	if (jsonResult.error) {
 		return {
 			data: null,
-			error: new Error(
-				`Failed to parse stats response: ${jsonResult.error.message}`
-			)
+			error: new Error(`Failed to parse stats response: ${jsonResult.error.message}`)
 		};
 	}
 
@@ -341,9 +311,7 @@ export function findStatId(statText: string): string | null {
 	}
 
 	if (!statsManager.isCacheReady()) {
-		console.warn(
-			'[Stats] Stats cache not initialized. Call fetchStats() first.'
-		);
+		console.warn('[Stats] Stats cache not initialized. Call fetchStats() first.');
 		return null;
 	}
 
@@ -377,9 +345,7 @@ export function getCachedImplicitStats(): StatOption[] | null {
 export function isImplicitSearch(statText: string): boolean {
 	if (!statText) return false;
 	const lowerText = statText.toLowerCase();
-	return CONFIG.IMPLICIT_INDICATORS.some((indicator) =>
-		lowerText.includes(indicator)
-	);
+	return CONFIG.IMPLICIT_INDICATORS.some((indicator) => lowerText.includes(indicator));
 }
 
 export function preloadStats(): void {

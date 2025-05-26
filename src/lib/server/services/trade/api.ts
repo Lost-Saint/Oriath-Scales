@@ -8,12 +8,10 @@ import { tryCatch } from '$lib/utils/error';
  * with configurable proxy support and comprehensive error handling.
  */
 export class TradeApiService {
-	private readonly baseUrl =
-		import.meta.env.VITE_POE_PROXY_URL || 'https://www.pathofexile.com';
+	private readonly baseUrl = import.meta.env.VITE_POE_PROXY_URL || 'https://www.pathofexile.com';
 	private readonly headers = {
 		'Content-Type': 'application/json',
-		'User-Agent':
-			'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
+		'User-Agent': 'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
 		Accept: '*/*'
 	};
 

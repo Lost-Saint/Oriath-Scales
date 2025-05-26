@@ -3,9 +3,7 @@ type Failure<E> = { data: null; error: E };
 type ResultSync<T, E> = Success<T> | Failure<E>;
 type ResultAsync<T, E> = Promise<ResultSync<T, E>>;
 
-export function tryCatch<T, E = Error>(
-	operation: Promise<T>
-): ResultAsync<T, E>;
+export function tryCatch<T, E = Error>(operation: Promise<T>): ResultAsync<T, E>;
 export function tryCatch<T, E = Error>(operation: () => T): ResultSync<T, E>;
 export function tryCatch<T, E = Error>(
 	operation: Promise<T> | (() => T)

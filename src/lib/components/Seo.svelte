@@ -2,8 +2,7 @@
 <script>
 	import { page } from '$app/state';
 
-	export let title =
-		'Tome of Trade - Path of Exile 2 Item Parser & Trade Search Tool';
+	export let title = 'Tome of Trade - Path of Exile 2 Item Parser & Trade Search Tool';
 	export let description =
 		'Copy and paste Path of Exile 2 items to instantly search the official trade website. Parse item stats, mods, and requirements with one click. Fast PoE2 trade tool.';
 	export let keywords =
@@ -102,13 +101,9 @@
 	<link rel="alternate" hreflang="en" href={page.url.href} />
 
 	<!-- Mobile Optimization -->
-	<meta
-		name="viewport"
-		content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
 	<meta name="mobile-web-app-capable" content="yes" />
 	<meta name="apple-mobile-web-app-capable" content="yes" />
-	<meta
-		name="apple-mobile-web-app-status-bar-style"
-		content="black-translucent" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 	<meta name="apple-mobile-web-app-title" content="Tome of Trade" />
 </svelte:head>
