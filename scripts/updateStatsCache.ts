@@ -1,4 +1,4 @@
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import { tryCatch } from '../src/lib/utils/error';
 

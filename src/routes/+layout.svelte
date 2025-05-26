@@ -1,11 +1,17 @@
 <script lang="ts">
+	import SkipLink from '$lib/components/SkipLink.svelte';
+	import type { Snippet } from 'svelte';
 	import '../styles/index.css';
 
-	let { children } = $props();
+	let { children }: { children?: Snippet } = $props();
 </script>
 
-<main class="flow content-grid">
-	{@render children()}
+<SkipLink href="#main" />
+
+<main class="flow content-grid" id="main">
+	{#if children}
+		{@render children()}
+	{/if}
 </main>
 
 <footer class="full-width">
