@@ -5,7 +5,7 @@ import type { RateLimitCheck, RateLimitState, RateLimitTier } from '$lib/types/t
  */
 export class RateLimitService {
 	private state: RateLimitState;
-	
+
 	constructor(tiers?: RateLimitTier[]) {
 		this.state = {
 			tiers: tiers || [

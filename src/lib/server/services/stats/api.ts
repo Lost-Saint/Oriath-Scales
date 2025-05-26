@@ -13,7 +13,7 @@ export class StatsApi {
 		'User-Agent': 'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
 		Accept: 'application/json'
 	};
-	
+
 	async fetchStats(): Promise<StatsResult> {
 		const response = await tryCatch(fetch(this.apiUrl, { headers: this.headers }));
 
