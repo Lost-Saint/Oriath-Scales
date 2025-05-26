@@ -8,11 +8,6 @@ import { tryCatch } from '../src/lib/utils/error';
 async function updateStatsCache(): Promise<void> {
   const dev = process.env.NODE_ENV === 'development';
   const CACHE_PATH = join(process.cwd(), 'src/lib/server/cache/stats.json');
-  const cacheDir = join(process.cwd(), 'src/lib/server/cache');
-  
-  // Ensure cache directory exists (using tryCatch)
-  const dirResult = await tryCatch(mkdir(cacheDir, { recursive: true }));
-  // We can ignore directory errors as it might already exist
   
   console.log('Fetching stats from Path of Exile API...');
   const fetchResult = await tryCatch(

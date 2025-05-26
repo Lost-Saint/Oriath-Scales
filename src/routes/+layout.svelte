@@ -30,11 +30,6 @@
 </footer>
 
 <style>
-	main {
-		min-height: 100vh; /* Ensures it takes up at least the full height of the viewport */
-		display: flex;
-		flex-direction: column;
-	}
 	footer {
 		display: flex;
 		justify-content: center;

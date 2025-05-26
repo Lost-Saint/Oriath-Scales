@@ -15,20 +15,10 @@ export class TradeApiService {
 		Accept: '*/*'
 	};
 
-	/**
-	 * Get the configured base URL for API requests
-	 */
 	getBaseUrl(): string {
 		return this.baseUrl;
 	}
 
-	/**
-	 * Performs a trade search request
-	 *
-	 * @param request Search request with league and query parameters
-	 * @returns Promise resolving to response and parsed data
-	 * @throws Error for connection or parsing failures
-	 */
 	async search(request: TradeSearchRequest): Promise<{
 		response: Response;
 		data: TradeApiResponse;
@@ -70,5 +60,4 @@ export class TradeApiService {
 	}
 }
 
-// Singleton instance
 export const tradeApiService = new TradeApiService();

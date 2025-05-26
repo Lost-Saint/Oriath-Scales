@@ -1,4 +1,3 @@
-// src/routes/api/search/+server.ts
 import { tradeApiService } from '$lib/server/services/trade/api';
 import { rateLimitService } from '$lib/server/services/trade/rateLimit';
 import type { ErrorResponse, TradeSearchRequest } from '$lib/types/trade';
@@ -10,39 +9,31 @@ import type { RequestHandler } from './$types';
  * SvelteKit POST handler for POE trade search
  */
 export const POST = (async ({ request }) => {
-	// Step 1: Check rate limit before proceeding
 	const rateLimitResult = checkRateLimit();
 
 	if (!rateLimitResult.allowed) {
-		// We know response exists when allowed is false
 		if (!rateLimitResult.response) {
 			throw new Error('Rate limit response not provided');
 		}
 		return rateLimitResult.response;
 	}
 
-	// Step 2: Parse the request body
 	const parsedBody = await parseRequestBody(request);
 	if (!parsedBody.success) {
 		return parsedBody.response;
 	}
 
 	try {
-		// Step 3: Call the trade API service
 		const { response, data } = await tradeApiService.search(parsedBody.data);
 
-		// Step 4: Update rate limits from response headers
 		rateLimitService.updateFromHeaders(response.headers);
 
-		// Step 5: Handle API error responses
 		if (!response.ok) {
 			return handleApiError(response);
 		}
 
-		// Step 6: Return successful response
 		return json(data);
 	} catch (error) {
-		// Step 7: Handle unexpected errors
 		console.error('Error in trade search:', error);
 		return createErrorResponse(
 			{
@@ -54,9 +45,6 @@ export const POST = (async ({ request }) => {
 	}
 }) satisfies RequestHandler;
 
-/**
- * Checks the rate limit and returns appropriate response if exceeded
- */
 function checkRateLimit(): { allowed: boolean; response?: Response } {
 	const rateLimitCheck = rateLimitService.checkLimit();
 
@@ -76,14 +64,10 @@ function checkRateLimit(): { allowed: boolean; response?: Response } {
 		return { allowed: false, response: errorResponse };
 	}
 
-	// Increment rate limits proactively
 	rateLimitService.incrementLimits();
 	return { allowed: true };
 }
 
-/**
- * Parses and validates the request body
- */
 async function parseRequestBody(
 	request: Request
 ): Promise<{ success: true; data: TradeSearchRequest } | { success: false; response: Response }> {
@@ -109,11 +93,7 @@ async function parseRequestBody(
 	};
 }
 
-/**
- * Handles error responses from the PoE API
- */
 function handleApiError(response: Response): Response {
-	// Handle rate limiting from PoE API
 	if (response.status === 429) {
 		const retryAfter = parseInt(response.headers.get('Retry-After') || '10');
 
@@ -127,7 +107,6 @@ function handleApiError(response: Response): Response {
 		);
 	}
 
-	// Handle forbidden responses
 	if (response.status === 403) {
 		console.error('API Access Forbidden:', {
 			status: response.status,
@@ -145,7 +124,6 @@ function handleApiError(response: Response): Response {
 		);
 	}
 
-	// Handle generic errors
 	return createErrorResponse(
 		{
 			error: `API Error: ${response.status}`,
@@ -155,9 +133,6 @@ function handleApiError(response: Response): Response {
 	);
 }
 
-/**
- * Creates a standardized error response
- */
 function createErrorResponse(data: ErrorResponse, status: number): Response {
 	return json(data, { status });
 }

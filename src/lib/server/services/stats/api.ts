@@ -13,13 +13,7 @@ export class StatsApi {
 		'User-Agent': 'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
 		Accept: 'application/json'
 	};
-
-	/**
-	 * Fetches stats data from the Path of Exile API
-	 *
-	 * @returns Promise resolving to validated stats data
-	 * @throws Error for network, parsing, or validation failures
-	 */
+	
 	async fetchStats(): Promise<StatsResult> {
 		const response = await tryCatch(fetch(this.apiUrl, { headers: this.headers }));
 
@@ -44,5 +38,4 @@ export class StatsApi {
 	}
 }
 
-// Singleton instance
 export const statsApi = new StatsApi();

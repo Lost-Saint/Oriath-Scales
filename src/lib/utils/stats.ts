@@ -224,7 +224,11 @@ export function extractValue(statText: string): number {
 export async function fetchStats(): Promise<StatOption[]> {
 	// Return cached data when available
 	if (statsManager.isCacheReady()) {
-		return statsManager.getCachedStats()!;
+		const cachedStats = statsManager.getCachedStats();
+		if (!cachedStats) {
+			throw new Error('Cache is ready but stats are null - this should not happen');
+		}
+		return cachedStats;
 	}
 
 	if (!statsManager.canAttemptFetch()) {

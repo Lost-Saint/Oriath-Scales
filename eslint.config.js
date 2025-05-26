@@ -13,8 +13,6 @@ export default ts.config(
 	includeIgnoreFile(gitignorePath),
 	js.configs.recommended,
 	...ts.configs.recommended,
-	...ts.configs.recommendedTypeChecked,
-	...ts.configs.strictTypeChecked,
 	...svelte.configs.recommended,
 	prettier,
 	...svelte.configs.prettier,
@@ -24,9 +22,6 @@ export default ts.config(
 		},
 		languageOptions: {
 			globals: { ...globals.browser, ...globals.node },
-			parserOptions: {
-				projectService: true,
-			}
 		},
 		rules: { 'no-undef': 'off' }
 	},

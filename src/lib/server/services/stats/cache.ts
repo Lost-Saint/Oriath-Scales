@@ -3,29 +3,15 @@ import type { CacheData, StatsResult } from '$lib/types/stats';
 import { tryCatch } from '$lib/utils/error';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-
-/**
- * Result of a cache read operation
- */
 interface CacheReadResult {
 	data: StatsResult;
 	isExpired: boolean;
 }
-
-/**
- * Manages caching of stats data to reduce API calls
- */
 export class StatsCache {
 	private readonly cachePath: string;
 	private readonly cacheDuration: number; // in milliseconds
 	private readonly cacheDir: string;
 
-	/**
-	 * Creates a new stats cache manager
-	 *
-	 * @param cacheDuration - How long cache remains valid (in milliseconds)
-	 * @param basePath - Base path for cache storage
-	 */
 	constructor(
 		cacheDuration: number = 24 * 60 * 60 * 1000, // 24 hours in milliseconds
 		basePath: string = process.cwd()
@@ -39,13 +25,7 @@ export class StatsCache {
 		await tryCatch(fs.mkdir(this.cacheDir, { recursive: true }));
 	}
 
-	/**
-	 * Read and validate the stats cache
-	 *
-	 * @returns The cached data and expiration status, or null if cache read fails
-	 */
 	async read(): Promise<CacheReadResult | null> {
-		// Ensure cache directory exists before reading
 		await this.ensureCacheDir();
 
 		const readResult = await tryCatch(fs.readFile(this.cachePath, 'utf-8'));
@@ -72,13 +52,7 @@ export class StatsCache {
 		};
 	}
 
-	/**
-	 * Write stats data to the cache file
-	 *
-	 * @param data - The stats data to cache
-	 */
 	async write(data: StatsResult): Promise<void> {
-		// Ensure the cache directory exists
 		await this.ensureCacheDir();
 
 		const cacheData: CacheData = {

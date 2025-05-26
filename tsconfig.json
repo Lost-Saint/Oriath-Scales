@@ -30,14 +30,6 @@
 		"sourceMap": true,
 		"removeComments": true,
     },
-	  "include": [
-		"**/*.ts",
-		"**/*.svelte",
-		"ambient.d.ts",
-    	"non-ambient.d.ts",
-    	"./types/**/$types.d.ts",
-  	],
-	"exclude": ["node_modules"]
 	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
 	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
 	//
