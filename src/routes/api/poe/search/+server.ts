@@ -11,11 +11,9 @@ import type { RequestHandler } from './$types';
 export const POST: RequestHandler = async ({ request }) => {
 	const rateLimitResult = checkRateLimit();
 
-		if (!rateLimitResult.allowed) {
-			// response is definitely defined when allowed is false
-			const { response } = rateLimitResult;
-			return response;
-		}
+    if (!rateLimitResult.allowed) {
+        return rateLimitResult.response;
+    }
 
 	const parsedBody = await parseRequestBody(request);
 	if (!parsedBody.success) {
@@ -23,13 +21,16 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const searchResult = await tryCatch(tradeApiService.search(parsedBody.data));
-	
+
 	if (searchResult.error) {
 		console.error('Error in trade search:', searchResult.error);
 		return createErrorResponse(
 			{
 				error: 'Trade API error',
-				details: searchResult.error instanceof Error ? searchResult.error.message : String(searchResult.error)
+				details:
+					searchResult.error instanceof Error
+						? searchResult.error.message
+						: String(searchResult.error)
 			},
 			500
 		);
@@ -48,9 +49,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	return json(data);
 };
 
-function checkRateLimit():
-  | { allowed: true }
-  | { allowed: false; response: Response } {
+function checkRateLimit(): { allowed: true } | { allowed: false; response: Response } {
 	const rateLimitCheck = rateLimitService.checkLimit();
 
 	if (!rateLimitCheck.allowed) {
@@ -98,8 +97,9 @@ async function parseRequestBody(
 function handleApiError(response: Response): Response {
 	if (response.status === 429) {
 		// Use the new getRetryAfterFromHeaders method if available
-		const retryAfter = rateLimitService.getRetryAfterFromHeaders(response.headers) || 
-						  parseInt(response.headers.get('Retry-After') || '10');
+		const retryAfter =
+			rateLimitService.getRetryAfterFromHeaders(response.headers) ||
+			parseInt(response.headers.get('Retry-After') || '10');
 
 		console.log(`[Rate Limits] API returned 429 - ${rateLimitService.getStatus()}`);
 

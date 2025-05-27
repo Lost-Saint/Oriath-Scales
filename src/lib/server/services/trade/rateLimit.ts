@@ -23,7 +23,8 @@ export class RateLimitService {
 				this.resetTierIfExpired(tier);
 				const remaining = tier.max - tier.hits;
 				const timeLeft = this.calculateTimeLeft(tier);
-				const restricted = tier.restrictedTime > 0 ? ` (restricted for ${tier.restrictedTime}s)` : '';
+				const restricted =
+					tier.restrictedTime > 0 ? ` (restricted for ${tier.restrictedTime}s)` : '';
 				return `Tier ${index + 1}: ${remaining}/${tier.max} requests remaining (resets in ${timeLeft}s)${restricted}`;
 			})
 			.join(' | ');
@@ -51,7 +52,7 @@ export class RateLimitService {
 	}
 
 	private resetExpiredTiers(): void {
-		this.state.tiers.forEach(tier => this.resetTierIfExpired(tier));
+		this.state.tiers.forEach((tier) => this.resetTierIfExpired(tier));
 	}
 
 	checkLimit(): RateLimitCheck {
@@ -83,13 +84,16 @@ export class RateLimitService {
 
 	updateFromHeaders(headers: Headers): void {
 		// Parse the rules to know which headers to look for
-		const rules = headers.get('X-Rate-Limit-Rules')?.split(',').map(r => r.trim()) || ['ip'];
-		
+		const rules = headers
+			.get('X-Rate-Limit-Rules')
+			?.split(',')
+			.map((r) => r.trim()) || ['ip'];
+
 		// For each rule, try to update our state
 		for (const rule of rules) {
 			const ruleHeader = headers.get(`X-Rate-Limit-${rule}`);
 			const stateHeader = headers.get(`X-Rate-Limit-${rule}-State`);
-			
+
 			if (ruleHeader && stateHeader) {
 				this.updateTiersFromHeaders(ruleHeader, stateHeader);
 				break; // Use the first available rule
@@ -99,7 +103,7 @@ export class RateLimitService {
 		console.log(`[Rate Limits] ${this.getStatus()}`);
 	}
 
-		private updateTiersFromHeaders(ruleHeader: string, stateHeader: string): void {
+	private updateTiersFromHeaders(ruleHeader: string, stateHeader: string): void {
 		const rules = ruleHeader.split(',');
 		const states = stateHeader.split(',');
 		const now = Date.now();
