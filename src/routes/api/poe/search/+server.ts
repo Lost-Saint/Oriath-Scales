@@ -40,7 +40,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const searchRequest = bodyResult.data as TradeSearchRequest;
-	const searchResult = await tryCatch(tradeApiService.search(searchRequest));
+	const searchResult = await tryCatch(tradeApiService.searchTrades(searchRequest));
 	const searchError = searchResult.error;
 
 	if (searchError) {
