@@ -8,49 +8,52 @@ import type { RequestHandler } from './$types';
 /**
  * SvelteKit POST handler for POE trade search
  */
-export const POST = (async ({ request }) => {
+export const POST: RequestHandler = async ({ request }) => {
 	const rateLimitResult = checkRateLimit();
 
-	if (!rateLimitResult.allowed) {
-		if (!rateLimitResult.response) {
-			throw new Error('Rate limit response not provided');
+		if (!rateLimitResult.allowed) {
+			// response is definitely defined when allowed is false
+			const { response } = rateLimitResult;
+			return response;
 		}
-		return rateLimitResult.response;
-	}
 
 	const parsedBody = await parseRequestBody(request);
 	if (!parsedBody.success) {
 		return parsedBody.response;
 	}
 
-	try {
-		const { response, data } = await tradeApiService.search(parsedBody.data);
-
-		rateLimitService.updateFromHeaders(response.headers);
-
-		if (!response.ok) {
-			return handleApiError(response);
-		}
-
-		return json(data);
-	} catch (error) {
-		console.error('Error in trade search:', error);
+	const searchResult = await tryCatch(tradeApiService.search(parsedBody.data));
+	
+	if (searchResult.error) {
+		console.error('Error in trade search:', searchResult.error);
 		return createErrorResponse(
 			{
 				error: 'Trade API error',
-				details: error instanceof Error ? error.message : String(error)
+				details: searchResult.error instanceof Error ? searchResult.error.message : String(searchResult.error)
 			},
 			500
 		);
 	}
-}) satisfies RequestHandler;
 
-function checkRateLimit(): { allowed: boolean; response?: Response } {
+	const { response, data } = searchResult.data;
+
+	rateLimitService.updateFromHeaders(response.headers);
+
+	if (!response.ok) {
+		return handleApiError(response);
+	}
+
+	rateLimitService.incrementLimits();
+
+	return json(data);
+};
+
+function checkRateLimit():
+  | { allowed: true }
+  | { allowed: false; response: Response } {
 	const rateLimitCheck = rateLimitService.checkLimit();
 
 	if (!rateLimitCheck.allowed) {
-		console.log(`[Rate Limits] Request blocked - ${rateLimitService.getStatus()}`);
-
 		const errorResponse = createErrorResponse(
 			{
 				error: 'Rate limit exceeded',
@@ -64,7 +67,6 @@ function checkRateLimit(): { allowed: boolean; response?: Response } {
 		return { allowed: false, response: errorResponse };
 	}
 
-	rateLimitService.incrementLimits();
 	return { allowed: true };
 }
 
@@ -95,13 +97,18 @@ async function parseRequestBody(
 
 function handleApiError(response: Response): Response {
 	if (response.status === 429) {
-		const retryAfter = parseInt(response.headers.get('Retry-After') || '10');
+		// Use the new getRetryAfterFromHeaders method if available
+		const retryAfter = rateLimitService.getRetryAfterFromHeaders(response.headers) || 
+						  parseInt(response.headers.get('Retry-After') || '10');
+
+		console.log(`[Rate Limits] API returned 429 - ${rateLimitService.getStatus()}`);
 
 		return createErrorResponse(
 			{
 				error: 'Rate limit exceeded',
 				details: `Please wait ${retryAfter} seconds`,
-				retryAfter
+				retryAfter,
+				rateLimitStatus: rateLimitService.getStatus()
 			},
 			429
 		);

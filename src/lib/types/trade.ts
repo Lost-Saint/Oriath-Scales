@@ -2,11 +2,12 @@ export interface RateLimitTier {
 	hits: number;
 	max: number;
 	period: number;
+	restrictedTime: number;
+	lastUpdated: number;
 }
 
 export interface RateLimitState {
 	tiers: RateLimitTier[];
-	lastReset: number;
 }
 
 export interface RateLimitCheck {
