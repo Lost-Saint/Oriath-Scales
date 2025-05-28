@@ -1,76 +1,116 @@
-// src/lib/server/services/stats/cache.ts
-import type { CacheData, StatsResult } from '$lib/types/stats';
+import type { StatsResult } from '$lib/types/stats';
 import { tryCatch } from '$lib/utils/error';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-interface CacheReadResult {
+
+interface CacheData {
 	data: StatsResult;
-	isExpired: boolean;
+	lastUpdated: string;
 }
-export class StatsCache {
-	private readonly cachePath: string;
-	private readonly cacheDuration: number; // in milliseconds
-	private readonly cacheDir: string;
 
-	constructor(
-		cacheDuration: number = 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-		basePath: string = process.cwd()
-	) {
-		this.cacheDuration = cacheDuration;
-		this.cacheDir = join(basePath, 'src/lib/server/cache');
-		this.cachePath = join(this.cacheDir, 'stats.json');
+interface StatsFromCacheResult {
+	data: StatsResult | null;
+	shouldRefresh: boolean;
+	writeToCache: (newData: StatsResult) => Promise<void>;
+}
+
+export async function getStatsFromCache(
+	cacheDurationMs: number = 24 * 60 * 60 * 1000,
+	basePath: string = process.cwd()
+): Promise<StatsFromCacheResult> {
+	const cacheDir = join(basePath, 'src/lib/server/cache');
+	const cachePath = join(cacheDir, 'stats.json');
+	const now = Date.now();
+
+	let cachedData: StatsResult | null = null;
+	let shouldRefresh = true;
+	let cacheReadSuccess = false;
+
+	const mkdirResult = await tryCatch(fs.mkdir(cacheDir, { recursive: true }));
+	if (mkdirResult.error) {
+		console.warn('Could not create cache directory:', mkdirResult.error);
 	}
 
-	private async ensureCacheDir(): Promise<void> {
-		await tryCatch(fs.mkdir(this.cacheDir, { recursive: true }));
-	}
+	const readResult = await tryCatch(fs.readFile(cachePath, 'utf-8'));
+	const cacheFileExists = !readResult.error;
 
-	async read(): Promise<CacheReadResult | null> {
-		await this.ensureCacheDir();
+	if (cacheFileExists) {
+		const rawCacheContent = readResult.data;
+		const parseResult = tryCatch<CacheData>(() => {
+			const parsed = JSON.parse(rawCacheContent);
+			const hasRequiredFields = parsed && 
+				typeof parsed === 'object' && 
+				parsed.data && 
+				typeof parsed.lastUpdated === 'string';
+				
+			if (!hasRequiredFields) {
+				throw new Error('Cache data missing required fields');
+			}
+			return parsed as CacheData;
+		});
 
-		const readResult = await tryCatch(fs.readFile(this.cachePath, 'utf-8'));
-		if (readResult.error) {
-			console.error('Error reading stats cache:', readResult.error);
-			return null;
+		const jsonParseSuccess = !parseResult.error;
+		if (jsonParseSuccess) {
+			const cacheData = parseResult.data;
+			const cacheTimestamp = new Date(cacheData.lastUpdated).getTime();
+			const cacheAge = now - cacheTimestamp;
+			const cacheIsValid = !isNaN(cacheTimestamp) && cacheAge >= 0;
+			const cacheIsFresh = cacheIsValid && cacheAge < cacheDurationMs;
+
+			if (cacheIsFresh) {
+				cachedData = cacheData.data;
+				shouldRefresh = false;
+				cacheReadSuccess = true;
+				console.log(`Cache hit! Age: ${Math.round(cacheAge / 1000)}s, limit: ${Math.round(cacheDurationMs / 1000)}s`);
+			} else if (cacheIsValid) {
+				cachedData = cacheData.data;
+				shouldRefresh = true;
+				console.log(`Cache expired! Age: ${Math.round(cacheAge / 1000)}s, limit: ${Math.round(cacheDurationMs / 1000)}s`);
+			} else {
+				console.warn('Cache has invalid timestamp, treating as expired');
+				shouldRefresh = true;
+			}
+		} else {
+			console.warn('Failed to parse cache JSON:', parseResult.error);
+			shouldRefresh = true;
 		}
-
-		const parseResult = tryCatch<CacheData>(() => JSON.parse(readResult.data) as CacheData);
-
-		if (parseResult.error) {
-			console.error('Error parsing stats cache:', parseResult.error);
-			return null;
-		}
-
-		const cache = parseResult.data;
-		const now = new Date().getTime();
-		const cacheTime = new Date(cache.lastUpdated).getTime();
-		const isExpired = now - cacheTime > this.cacheDuration;
-
-		return {
-			data: cache.data,
-			isExpired
-		};
+	} else {
+		console.log('No cache file found, will need fresh data');
+		shouldRefresh = true;
 	}
 
-	async write(data: StatsResult): Promise<void> {
-		await this.ensureCacheDir();
-
-		const cacheData: CacheData = {
-			data,
-			lastUpdated: new Date().toISOString()
-		};
-
-		const writeResult = await tryCatch(
-			fs.writeFile(this.cachePath, JSON.stringify(cacheData, null, 2))
-		);
-
-		if (writeResult.error) {
-			console.error('Error writing stats cache:', writeResult.error);
+	const writeToCache = async (newData: StatsResult): Promise<void> => {
+		const ensureDirResult = await tryCatch(fs.mkdir(cacheDir, { recursive: true }));
+		if (ensureDirResult.error) {
+			console.error('Failed to ensure cache directory exists for writing:', ensureDirResult.error);
 			return;
 		}
 
-		console.log('Stats cache updated successfully');
-	}
+		const cacheDataToWrite: CacheData = {
+			data: newData,
+			lastUpdated: new Date().toISOString()
+		};
+
+		const jsonToWrite = JSON.stringify(cacheDataToWrite, null, 2);
+
+		const writeResult = await tryCatch(fs.writeFile(cachePath, jsonToWrite, 'utf-8'));
+		
+		if (writeResult.error) {
+			console.error('Failed to write stats cache:', writeResult.error);
+			return;
+		}
+
+		const dataSize = jsonToWrite.length;
+		console.log(`Cache written successfully (${dataSize} bytes)`);
+	};
+
+	return {
+		data: cachedData,
+		shouldRefresh,
+		writeToCache
+	};
 }
 
-export const statsCache = new StatsCache();
+export async function getCachedStats(): Promise<StatsFromCacheResult> {
+	return getStatsFromCache();
+}

@@ -1,42 +1,64 @@
 // src/routes/api/stats/+server.ts
-import { statsApi } from '$lib/server/services/stats/api';
-import { statsCache } from '$lib/server/services/stats/cache';
+import { fetchPoEStats } from '$lib/server/services/stats/api';
+import { getStatsFromCache } from '$lib/server/services/stats/cache';
 import { tryCatch } from '$lib/utils/error';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-const CACHE_DURATION_SECONDS = 24 * 60 * 60; // 24 hours in seconds
-const FALLBACK_CACHE_DURATION = 60 * 60; // 1 hour in seconds
+const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const CACHE_DURATION_SECONDS = 24 * 60 * 60; // 24 hours in seconds for HTTP headers
+const FALLBACK_CACHE_DURATION = 60 * 60; // 1 hour in seconds for stale cache
 
-/**
- * SvelteKit GET handler for Path of Exile stats data
- *
- * Returns cached stats when available, or fetches fresh data
- */
-export const GET = (async () => {
-	const cacheResult = await tryCatch(statsCache.read());
-
-	if (!cacheResult.error && cacheResult.data && !cacheResult.data.isExpired) {
-		return createSuccessResponse(cacheResult.data.data, CACHE_DURATION_SECONDS);
-	}
-
-	const apiResult = await tryCatch(statsApi.fetchStats());
-
-	if (apiResult.error) {
-		console.error('Failed to fetch fresh stats data:', apiResult.error);
-
-		if (cacheResult.data?.data) {
-			console.log('Using expired cache due to API failure');
-			return createSuccessResponse(cacheResult.data.data, FALLBACK_CACHE_DURATION);
+export const GET: RequestHandler = async () => {
+	const cacheResult = await tryCatch(getStatsFromCache(CACHE_DURATION_MS));
+	
+	const cacheCallFailed = Boolean(cacheResult.error);
+	if (cacheCallFailed) {
+		console.error('Cache system failed completely:', cacheResult.error);
+		const apiResult = await tryCatch(fetchPoEStats());
+		const apiFetchFailed = Boolean(apiResult.error);
+		
+		if (apiFetchFailed) {
+			console.error('Both cache and API failed:', apiResult.error);
+			return createErrorResponse('Stats service temporarily unavailable');
 		}
-
-		return createErrorResponse('Failed to fetch stats data');
+		
+		const freshStatsData = apiResult.data!;
+		console.log('Got fresh stats despite cache failure');
+		return createSuccessResponse(freshStatsData, CACHE_DURATION_SECONDS);
 	}
-
-	void tryCatch(statsCache.write(apiResult.data));
-
-	return createSuccessResponse(apiResult.data, CACHE_DURATION_SECONDS);
-}) satisfies RequestHandler;
+	
+	const { data: cachedData, shouldRefresh, writeToCache } = cacheResult.data!;
+	
+	const hasValidCachedData = cachedData !== null && !shouldRefresh;
+	if (hasValidCachedData) {
+		console.debug('Serving stats from fresh cache');
+		return createSuccessResponse(cachedData, CACHE_DURATION_SECONDS);
+	}
+	
+	console.debug('Cache miss or expired, fetching fresh stats data');
+	const apiResult = await tryCatch(fetchPoEStats());
+	const apiFetchFailed = Boolean(apiResult.error);
+	
+	if (apiFetchFailed) {
+		console.error('Failed to fetch fresh stats data:', apiResult.error);
+		const hasStaleData = cachedData !== null;
+		if (hasStaleData) {
+			console.log('Using stale cache data due to API failure');
+			return createSuccessResponse(cachedData, FALLBACK_CACHE_DURATION);
+		}
+		const errorMessage = 'Failed to fetch stats data and no cached data available';
+		return createErrorResponse(errorMessage);
+	}
+	
+	const freshStatsData = apiResult.data!;
+	console.debug('Successfully fetched fresh stats, updating cache');
+	writeToCache(freshStatsData).catch((error: any) => {
+		console.error('Failed to update cache after successful API fetch:', error);
+	});
+	
+	return createSuccessResponse(freshStatsData, CACHE_DURATION_SECONDS);
+}
 
 function createSuccessResponse(data: unknown, maxAge: number) {
 	return json(data, {

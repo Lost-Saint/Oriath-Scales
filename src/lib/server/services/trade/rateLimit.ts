@@ -1,11 +1,8 @@
 import type { RateLimitCheck, RateLimitState, RateLimitTier } from '$lib/types/trade';
 
-/**
- * Manages API rate limiting for Path of Exile trade API
- * Refactored with grug wisdom: complexity very very bad!
- */
 export class RateLimitService {
 	private state: RateLimitState;
+	private static readonly MAX_TIERS = 10;
 
 	constructor(tiers?: RateLimitTier[]) {
 		const now = Date.now();
@@ -16,9 +13,9 @@ export class RateLimitService {
 
 	private createDefaultTiers(now: number): RateLimitTier[] {
 		return [
-			{ hits: 0, max: 5, period: 10, restrictedTime: 0, lastUpdated: now },
-			{ hits: 0, max: 15, period: 60, restrictedTime: 0, lastUpdated: now },
-			{ hits: 0, max: 30, period: 300, restrictedTime: 0, lastUpdated: now }
+			{ hits: 0, max: 5, period: 10000, restrictedTime: 0, lastUpdated: now }, // 10 seconds in ms
+			{ hits: 0, max: 15, period: 60000, restrictedTime: 0, lastUpdated: now }, // 60 seconds in ms
+			{ hits: 0, max: 30, period: 300000, restrictedTime: 0, lastUpdated: now } // 300 seconds in ms
 		];
 	}
 
@@ -30,10 +27,12 @@ export class RateLimitService {
 
 			const remaining = tier.max - tier.hits;
 			const timeLeft = this.calculateTimeLeft(tier);
-			const isRestricted = tier.restrictedTime > 0;
-			const restrictedText = isRestricted ? ` (restricted for ${tier.restrictedTime}s)` : '';
+			const isRestricted = tier.restrictedTime > Date.now();
+			const restrictedText = isRestricted
+				? ` (restricted for ${Math.ceil((tier.restrictedTime - Date.now()) / 1000)}s)`
+				: '';
 
-			const statusText = `Tier ${index + 1}: ${remaining}/${tier.max} requests remaining (resets in ${timeLeft}s)${restrictedText}`;
+			const statusText = `Tier ${index + 1}: ${remaining}/${tier.max} requests remaining (resets in ${Math.ceil(timeLeft / 1000)}s)${restrictedText}`;
 			statusParts.push(statusText);
 		});
 
@@ -41,14 +40,14 @@ export class RateLimitService {
 	}
 
 	private calculateTimeLeft(tier: RateLimitTier): number {
-		const timeSinceUpdate = (Date.now() - tier.lastUpdated) / 1000;
+		const timeSinceUpdate = Date.now() - tier.lastUpdated;
 		const timeLeft = tier.period - timeSinceUpdate;
-		return Math.max(0, Math.ceil(timeLeft));
+		return Math.max(0, timeLeft);
 	}
 
 	private resetTierIfExpired(tier: RateLimitTier): void {
 		const now = Date.now();
-		const timeSinceUpdate = (now - tier.lastUpdated) / 1000;
+		const timeSinceUpdate = now - tier.lastUpdated;
 
 		const periodIsExpired = timeSinceUpdate >= tier.period;
 		if (periodIsExpired) {
@@ -56,10 +55,9 @@ export class RateLimitService {
 			tier.lastUpdated = now;
 		}
 
-		const isRestricted = tier.restrictedTime > 0;
-		if (isRestricted) {
-			const newRestrictionTime = tier.restrictedTime - timeSinceUpdate;
-			tier.restrictedTime = Math.max(0, newRestrictionTime);
+		const isRestricted = tier.restrictedTime > now;
+		if (!isRestricted && tier.restrictedTime > 0) {
+			tier.restrictedTime = 0; // Clear expired restriction
 		}
 	}
 
@@ -67,33 +65,40 @@ export class RateLimitService {
 		this.state.tiers.forEach((tier) => this.resetTierIfExpired(tier));
 	}
 
-	checkLimit(): RateLimitCheck {
+	checkAndIncrementLimit(): RateLimitCheck {
 		this.resetAllExpiredTiers();
 
 		for (const tier of this.state.tiers) {
-			const isCurrentlyRestricted = tier.restrictedTime > 0;
+			const isCurrentlyRestricted = tier.restrictedTime > Date.now();
 			if (isCurrentlyRestricted) {
-				const timeToWait = Math.ceil(tier.restrictedTime);
+				const timeToWait = Math.ceil((tier.restrictedTime - Date.now()) / 1000);
 				return { allowed: false, timeToWait };
 			}
 
 			const wouldExceedLimit = tier.hits >= tier.max;
 			if (wouldExceedLimit) {
-				const timeToWait = this.calculateTimeLeft(tier);
+				const timeToWait = Math.ceil(this.calculateTimeLeft(tier) / 1000);
 				return { allowed: false, timeToWait };
 			}
 		}
 
+		this.incrementLimits();
 		return { allowed: true };
 	}
 
 	incrementLimits(): void {
-		const now = Date.now();
-
 		this.state.tiers.forEach((tier) => {
 			tier.hits++;
-			tier.lastUpdated = now;
 		});
+	}
+
+	setRestriction(durationSeconds: number): void {
+		const restrictedUntil = Date.now() + durationSeconds * 1000;
+
+		const tier = this.state.tiers[0];
+		if (tier) {
+			tier.restrictedTime = restrictedUntil;
+		}
 	}
 
 	updateFromHeaders(headers: Headers): void {
@@ -114,7 +119,10 @@ export class RateLimitService {
 		const hasRulesHeader = rulesHeader !== null;
 
 		if (hasRulesHeader) {
-			return rulesHeader.split(',').map((r) => r.trim());
+			return rulesHeader
+				.split(',')
+				.map((r) => r.trim())
+				.filter(Boolean);
 		}
 
 		return ['ip'];
@@ -126,8 +134,13 @@ export class RateLimitService {
 
 		const hasRequiredHeaders = ruleHeader && stateHeader;
 		if (hasRequiredHeaders) {
-			this.updateTiersFromHeaders(ruleHeader, stateHeader);
-			return true;
+			try {
+				this.updateTiersFromHeaders(ruleHeader, stateHeader);
+				return true;
+			} catch (error) {
+				console.warn(`[Rate Limits] Failed to update from headers for rule ${rule}:`, error);
+				return false;
+			}
 		}
 
 		return false;
@@ -143,7 +156,11 @@ export class RateLimitService {
 			const hasValidData = rule && state;
 
 			if (hasValidData) {
-				this.updateSingleTier(rule, state, index, now);
+				try {
+					this.updateSingleTier(rule, state, index, now);
+				} catch (error) {
+					console.warn(`[Rate Limits] Failed to update tier ${index}:`, error);
+				}
 			}
 		});
 	}
@@ -154,20 +171,53 @@ export class RateLimitService {
 
 		const hasEnoughParts = ruleParts.length >= 3 && stateParts.length >= 3;
 		if (!hasEnoughParts) {
+			console.warn(`[Rate Limits] Invalid header format - rule: ${rule}, state: ${state}`);
 			return;
 		}
 
-		const max = parseInt(ruleParts[0] || '0');
-		const period = parseInt(ruleParts[1] || '0');
-		const hits = parseInt(stateParts[0] || '0');
-		const restrictedTime = parseInt(stateParts[2] || '0');
+		const max = this.safeParseInt(ruleParts[0], 'max');
+		const periodSeconds = this.safeParseInt(ruleParts[1], 'period');
+		const hits = this.safeParseInt(stateParts[0], 'hits');
+		const restrictedTimeSeconds = this.safeParseInt(stateParts[2], 'restrictedTime');
+
+		if (max === null || periodSeconds === null || hits === null || restrictedTimeSeconds === null) {
+			console.warn(`[Rate Limits] Failed to parse numeric values from headers`);
+			return;
+		}
+
+		const period = periodSeconds * 1000;
+		const restrictedTime = restrictedTimeSeconds > 0 ? now + restrictedTimeSeconds * 1000 : 0;
+
+		if (max < 0 || periodSeconds < 0 || hits < 0 || restrictedTimeSeconds < 0) {
+			console.warn(`[Rate Limits] Invalid negative values in headers`);
+			return;
+		}
 
 		const tierExists = index < this.state.tiers.length;
 		if (tierExists) {
 			this.updateExistingTier(index, { hits, max, period, restrictedTime, now });
-		} else {
+		} else if (this.state.tiers.length < RateLimitService.MAX_TIERS) {
 			this.addNewTier({ hits, max, period, restrictedTime, now });
+		} else {
+			console.warn(
+				`[Rate Limits] Maximum number of tiers (${RateLimitService.MAX_TIERS}) reached, ignoring additional tier`
+			);
 		}
+	}
+
+	private safeParseInt(value: string | undefined, fieldName: string): number | null {
+		if (!value) {
+			console.warn(`[Rate Limits] Missing value for ${fieldName}`);
+			return null;
+		}
+
+		const parsed = parseInt(value.trim(), 10);
+		if (isNaN(parsed)) {
+			console.warn(`[Rate Limits] Invalid integer value for ${fieldName}: ${value}`);
+			return null;
+		}
+
+		return parsed;
 	}
 
 	private updateExistingTier(
@@ -175,13 +225,15 @@ export class RateLimitService {
 		data: { hits: number; max: number; period: number; restrictedTime: number; now: number }
 	): void {
 		const tier = this.state.tiers[index];
-		if (tier) {
-			tier.hits = data.hits;
-			tier.max = data.max;
-			tier.period = data.period;
-			tier.restrictedTime = data.restrictedTime;
-			tier.lastUpdated = data.now;
+		if (!tier) {
+			console.warn(`[Rate Limits] Tier index ${index} out of bounds`);
+			return;
 		}
+		tier.hits = data.hits;
+		tier.max = data.max;
+		tier.period = data.period;
+		tier.restrictedTime = data.restrictedTime;
+		tier.lastUpdated = data.now;
 	}
 
 	private addNewTier(data: {
@@ -205,7 +257,11 @@ export class RateLimitService {
 		const hasRetryAfter = retryAfter !== null;
 
 		if (hasRetryAfter) {
-			return parseInt(retryAfter);
+			const parsed = parseInt(retryAfter, 10);
+			if (!isNaN(parsed) && parsed >= 0) {
+				return parsed;
+			}
+			console.warn(`[Rate Limits] Invalid Retry-After header value: ${retryAfter}`);
 		}
 
 		return undefined;

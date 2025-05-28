@@ -191,7 +191,7 @@ function normalizeStatText(text: string): string {
 		.replace(/\|.*?(?=\s|$)/g, '') // Remove pipe sections
 		.replace(/[+-]?\d+\.?\d*/g, '#') // Replace numbers with placeholder
 		.replace(/\s+/g, ' ') // Normalize whitespace
-		.replace(/\s*\(implicit\)$/, '')
+		.replace(/\s*\(implicit\)$/, '') // remove `(implicit)`
 		.replace(/^adds /, '') // Remove common prefixes
 		.replace(/^gain /, '')
 		.replace(/^you /, '')
