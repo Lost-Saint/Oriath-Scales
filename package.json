@@ -23,7 +23,7 @@
 		"@sveltejs/adapter-auto": "^6.0.1",
 		"@sveltejs/kit": "^2.21.1",
 		"@sveltejs/vite-plugin-svelte": "^5.0.3",
-		"@types/node": "^22.15.21",
+		"@types/node": "^22.15.24",
 		"browserslist": "^4.24.5",
 		"eslint": "9.27.0",
 		"eslint-config-prettier": "10.1.5",
@@ -32,11 +32,11 @@
 		"lightningcss": "^1.30.1",
 		"prettier": "^3.5.3",
 		"prettier-plugin-svelte": "^3.4.0",
-		"svelte": "^5.33.2",
+		"svelte": "^5.33.5",
 		"svelte-check": "^4.2.1",
 		"tsx": "^4.19.4",
 		"typescript": "^5.8.3",
-		"typescript-eslint": "8.32.1",
+		"typescript-eslint": "8.33.0",
 		"vite": "^6.3.5"
 	},
 	"pnpm": {
