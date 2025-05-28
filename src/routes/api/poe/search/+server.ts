@@ -6,7 +6,6 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request }) => {
-	// Use the new atomic check and increment method
 	const rateLimitCheck = rateLimitService.checkAndIncrementLimit();
 	const isRateLimited = !rateLimitCheck.allowed;
 
@@ -57,12 +56,10 @@ export const POST: RequestHandler = async ({ request }) => {
 	if (responseNotOk) {
 		const isRateLimitError = response.status === 429;
 		if (isRateLimitError) {
-			// Use the new setRestriction method when we get a 429
 			const retryAfterFromService = rateLimitService.getRetryAfterFromHeaders(response.headers);
 			const retryAfterFromHeader = response.headers.get('Retry-After');
 			const retryAfter = retryAfterFromService || parseInt(retryAfterFromHeader || '10');
 
-			// Set restriction based on server response
 			rateLimitService.setRestriction(retryAfter);
 
 			console.log(`[Rate Limits] API returned 429 - ${rateLimitService.getStatus()}`);
@@ -104,7 +101,6 @@ export const POST: RequestHandler = async ({ request }) => {
 		);
 	}
 
-	// Success case - no need to manually increment since checkAndIncrementLimit() already did it
 	return json(data);
 };
 

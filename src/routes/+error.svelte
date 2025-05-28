@@ -2,9 +2,6 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 
-	// we don't want to use <svelte:window bind:online> here,
-	// because we only care about the online state when
-	// the page first loads
 	const online = browser ? navigator.onLine : true;
 </script>
 
