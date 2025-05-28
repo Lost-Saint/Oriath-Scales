@@ -24,7 +24,6 @@ export async function getStatsFromCache(
 
 	let cachedData: StatsResult | null = null;
 	let shouldRefresh = true;
-	let cacheReadSuccess = false;
 
 	const mkdirResult = await tryCatch(fs.mkdir(cacheDir, { recursive: true }));
 	if (mkdirResult.error) {
@@ -38,11 +37,12 @@ export async function getStatsFromCache(
 		const rawCacheContent = readResult.data;
 		const parseResult = tryCatch<CacheData>(() => {
 			const parsed = JSON.parse(rawCacheContent);
-			const hasRequiredFields = parsed && 
-				typeof parsed === 'object' && 
-				parsed.data && 
+			const hasRequiredFields =
+				parsed &&
+				typeof parsed === 'object' &&
+				parsed.data &&
 				typeof parsed.lastUpdated === 'string';
-				
+
 			if (!hasRequiredFields) {
 				throw new Error('Cache data missing required fields');
 			}
@@ -60,12 +60,15 @@ export async function getStatsFromCache(
 			if (cacheIsFresh) {
 				cachedData = cacheData.data;
 				shouldRefresh = false;
-				cacheReadSuccess = true;
-				console.log(`Cache hit! Age: ${Math.round(cacheAge / 1000)}s, limit: ${Math.round(cacheDurationMs / 1000)}s`);
+				console.log(
+					`Cache hit! Age: ${Math.round(cacheAge / 1000)}s, limit: ${Math.round(cacheDurationMs / 1000)}s`
+				);
 			} else if (cacheIsValid) {
 				cachedData = cacheData.data;
 				shouldRefresh = true;
-				console.log(`Cache expired! Age: ${Math.round(cacheAge / 1000)}s, limit: ${Math.round(cacheDurationMs / 1000)}s`);
+				console.log(
+					`Cache expired! Age: ${Math.round(cacheAge / 1000)}s, limit: ${Math.round(cacheDurationMs / 1000)}s`
+				);
 			} else {
 				console.warn('Cache has invalid timestamp, treating as expired');
 				shouldRefresh = true;
@@ -94,7 +97,7 @@ export async function getStatsFromCache(
 		const jsonToWrite = JSON.stringify(cacheDataToWrite, null, 2);
 
 		const writeResult = await tryCatch(fs.writeFile(cachePath, jsonToWrite, 'utf-8'));
-		
+
 		if (writeResult.error) {
 			console.error('Failed to write stats cache:', writeResult.error);
 			return;
