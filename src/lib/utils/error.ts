@@ -22,7 +22,7 @@ type ResultSync<T, E> = Success<T> | Failure<E>;
  * @template T - The type of the successful data
  * @template E - The type of the error (defaults to Error)
  */
-type ResultAsync<T, E> = Promise<ResultSync<T, E>>;
+export type ResultAsync<T, E> = Promise<ResultSync<T, E>>;
 
 /**
  * A utility function that wraps operations in try-catch blocks and returns a consistent result format.
