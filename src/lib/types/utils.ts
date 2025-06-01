@@ -19,7 +19,7 @@ export interface StatOption {
 /**
  * Raw stat entry from API
  */
-export interface StatEntry {
+interface StatEntry {
 	id: string;
 	text: string;
 	option?: Record<string, unknown>;

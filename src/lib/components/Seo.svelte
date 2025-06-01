@@ -80,10 +80,6 @@
 	<link rel="preconnect" href="https://www.pathofexile.com" />
 	<link rel="preconnect" href="https://web.poecdn.com" />
 
-	<!-- DNS Prefetch for faster loading -->
-	<link rel="dns-prefetch" href="//fonts.googleapis.com" />
-	<link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
-
 	<!-- Favicon and App Icons -->
 	<!-- <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
 	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />

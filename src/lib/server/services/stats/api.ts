@@ -12,28 +12,26 @@ export async function fetchPoEStats(): Promise<StatsResult> {
 	);
 
 	if (response.error) {
-		const connectionError = `Connection error: ${response.error.message}`;
-		throw new Error(`Failed to fetch PoE stats: ${connectionError}`);
+		throw new Error(`Failed to fetch PoE stats: Connection error: ${response.error.message}`);
 	}
 
 	const fetchResult = response.data;
-	if (!fetchResult.ok) {
-		const httpError = `HTTP ${fetchResult.status}: ${fetchResult.statusText}`;
+	if (!fetchResult || !fetchResult.ok) {
+		const httpError = fetchResult
+			? `HTTP ${fetchResult.status}: ${fetchResult.statusText}`
+			: 'No response object';
 		throw new Error(`Failed to fetch PoE stats: ${httpError}`);
 	}
 
 	const jsonResult = await tryCatch(fetchResult.json());
 	if (jsonResult.error) {
-		const parseError = `JSON parse error: ${jsonResult.error.message}`;
-		throw new Error(`Failed to parse stats response: ${parseError}`);
+		throw new Error(`Failed to parse stats response: ${jsonResult.error.message}`);
 	}
 
-	const statsData = jsonResult.data as StatsResult;
-	const hasValidResult = Array.isArray(statsData.result);
-
-	if (!hasValidResult) {
+	const statsData = jsonResult.data;
+	if (!statsData || !Array.isArray(statsData.result)) {
 		throw new Error('Invalid API response: missing or invalid "result" array');
 	}
 
-	return statsData;
+	return statsData as StatsResult;
 }

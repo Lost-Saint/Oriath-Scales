@@ -36,6 +36,11 @@
 </footer>
 
 <style>
+	main {
+		display: flex;
+		min-height: 100vh;
+		flex-direction: column;
+	}
 	footer {
 		display: flex;
 		justify-content: center;
