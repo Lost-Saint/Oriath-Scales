@@ -15,7 +15,6 @@ db.sqlite
 
 # production
 /build
-/src/lib/server/cache/stats.json
 
 # misc
 .DS_Store
