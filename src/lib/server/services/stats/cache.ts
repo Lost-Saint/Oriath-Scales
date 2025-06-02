@@ -49,46 +49,31 @@ export async function getStatsFromCache(
 			return parsed as CacheData;
 		});
 
-		const jsonParseSuccess = !parseResult.error;
-		if (jsonParseSuccess) {
+		if (!parseResult.error) {
 			const cacheData = parseResult.data;
 			const cacheTimestamp = new Date(cacheData.lastUpdated).getTime();
 			const cacheAge = now - cacheTimestamp;
-			const cacheIsValid = !isNaN(cacheTimestamp) && cacheAge >= 0;
-			const cacheIsFresh = cacheIsValid && cacheAge < cacheDurationMs;
 
-			if (cacheIsFresh) {
+			if (!isNaN(cacheTimestamp) && cacheAge >= 0) {
 				cachedData = cacheData.data;
-				shouldRefresh = false;
+				shouldRefresh = cacheAge >= cacheDurationMs;
+
 				console.log(
-					`Cache hit! Age: ${Math.round(cacheAge / 1000)}s, limit: ${Math.round(cacheDurationMs / 1000)}s`
-				);
-			} else if (cacheIsValid) {
-				cachedData = cacheData.data;
-				shouldRefresh = true;
-				console.log(
-					`Cache expired! Age: ${Math.round(cacheAge / 1000)}s, limit: ${Math.round(cacheDurationMs / 1000)}s`
+					`Cache ${shouldRefresh ? 'expired' : 'hit'}! Age: ${Math.round(cacheAge / 1000)}s, limit: ${Math.round(
+						cacheDurationMs / 1000
+					)}s`
 				);
 			} else {
 				console.warn('Cache has invalid timestamp, treating as expired');
-				shouldRefresh = true;
 			}
 		} else {
 			console.warn('Failed to parse cache JSON:', parseResult.error);
-			shouldRefresh = true;
 		}
 	} else {
 		console.log('No cache file found, will need fresh data');
-		shouldRefresh = true;
 	}
 
 	const writeToCache = async (newData: StatsResult): Promise<void> => {
-		const ensureDirResult = await tryCatch(fs.mkdir(cacheDir, { recursive: true }));
-		if (ensureDirResult.error) {
-			console.error('Failed to ensure cache directory exists for writing:', ensureDirResult.error);
-			return;
-		}
-
 		const cacheDataToWrite: CacheData = {
 			data: newData,
 			lastUpdated: new Date().toISOString()

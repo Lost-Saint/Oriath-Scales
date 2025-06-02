@@ -10,29 +10,6 @@
 	export let image = 'static/favicon.png';
 	export const league = '';
 	export let canonicalUrl = '';
-
-	// Structured data for better search results
-	$: structuredData = {
-		'@context': 'https://schema.org',
-		'@type': 'WebApplication',
-		name: 'Tome of Trade',
-		description: description,
-		url: page.url.href,
-		applicationCategory: 'GameApplication',
-		operatingSystem: 'Web Browser',
-		about: {
-			'@type': 'VideoGame',
-			name: 'Path of Exile 2',
-			publisher: 'Grinding Gear Games'
-		},
-		featureList: [
-			'Copy-paste item parsing',
-			'Instant trade search',
-			'Item stat analysis',
-			'Direct pathofexile.com/trade integration',
-			'One-click item lookup'
-		]
-	};
 </script>
 
 <svelte:head>
@@ -74,7 +51,6 @@
 	<meta name="theme-color" content="#1a202c" />
 
 	<!-- Structured Data -->
-	{@html `<script type="application/ld+json">${JSON.stringify(structuredData)}</script>`}
 
 	<!-- Preconnect to external domains -->
 	<link rel="preconnect" href="https://www.pathofexile.com" />

@@ -19,9 +19,7 @@
 				know, or raise an issue on
 				<a href="https://github.com/Lost-Saint/Tome-of-Trade">GitHub</a>. Thanks!
 			</p>
-			<button type="button">
-				<a href="/">Return home </a>
-			</button>
+			<a href="/">Return home </a>
 		{:else}
 			<h1>Yikes!</h1>
 			<p>Something went wrong when we tried to render this page.</p>
@@ -45,7 +43,7 @@
 
 <style>
 	.container {
-		padding: var(--sk-page-padding-top) var(--sk-page-padding-side) 6rem var(--sk-page-padding-side);
+		padding: 60px 32px 60px 32px;
 		height: 100%;
 	}
 	h1,
@@ -61,10 +59,10 @@
 		margin: 1em auto;
 	}
 	.error {
-		background-color: var(--sk-theme-2);
+		background-color: var(--primary-bg);
 		color: white;
 		padding: 12px 16px;
-		font: 600 16px/1.7 var(--sk-font);
+		font: 600 16px/1.7 var(--font-mono);
 		border-radius: 2px;
 	}
 </style>

@@ -1,4 +1,3 @@
-// src/routes/api/stats/+server.ts
 import { fetchPoEStats } from '$lib/server/services/stats/api';
 import { getStatsFromCache } from '$lib/server/services/stats/cache';
 import { tryCatch } from '$lib/utils/error';

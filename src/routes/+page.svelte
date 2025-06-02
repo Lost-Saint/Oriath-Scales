@@ -44,7 +44,7 @@
 			<div class="links-buttons">
 				<a
 					class="link-github"
-					href="https://github.com/Lost-Saint"
+					href="https://github.com/Lost-Saint/Tome-of-Trade"
 					target="_blank"
 					rel="noopener noreferrer"
 					aria-label="View source code on GitHub"
