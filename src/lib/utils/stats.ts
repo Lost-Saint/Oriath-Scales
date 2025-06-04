@@ -8,7 +8,7 @@ let implicitFuseInstance: Fuse<StatOption> | null = null;
 let lastFetchAttempt = 0;
 
 const CACHE_RETRY_INTERVAL = 60000;
-const FUSE_THRESHOLD = 0.8;
+const FUSE_THRESHOLD = 0.6;
 
 export async function fetchStats(): Promise<StatOption[]> {
 	const now = Date.now();
@@ -178,7 +178,7 @@ function createFuseInstance(stats: StatOption[]): Fuse<StatOption> {
 		threshold: FUSE_THRESHOLD,
 		distance: 300,
 		ignoreLocation: true,
-		minMatchCharLength: 2,
+		minMatchCharLength: 3,
 		useExtendedSearch: true,
 		getFn: (obj, path) => {
 			if (path === 'text' && typeof obj.text === 'string') {
