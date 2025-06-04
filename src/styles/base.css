@@ -4,7 +4,7 @@ h3,
 .section-title {
   font-family: var(--font-primary);
   color: var(--text-accent);
-}
+ }
 
 body {
   font-family: var(--font-secondary);

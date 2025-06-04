@@ -8,6 +8,8 @@
 			var(--primary-accent),
 			#c95d28);
 
+    --prime-blue: hsl(220 24.5% 10.4%);
+
 	/* Text Colors */
 	--text-primary: #e6e6e6;
 	--text-secondary: #a7b1c2;
