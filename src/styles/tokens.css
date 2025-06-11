@@ -4,11 +4,9 @@
 	--primary-bg: #161b22;
 	--primary-accent: #d17b46;
 	--primary-hover: #e8945b;
-	--primary-gradient: linear-gradient(to right,
-			var(--primary-accent),
-			#c95d28);
+	--primary-gradient: linear-gradient(to right, var(--primary-accent), #c95d28);
 
-    --prime-blue: hsl(220 24.5% 10.4%);
+	--prime-blue: hsl(220 24.5% 10.4%);
 
 	/* Text Colors */
 	--text-primary: #e6e6e6;
@@ -25,8 +23,6 @@
 	--ui-error-border: rgba(239, 68, 68, 0.2);
 	--ui-error-text: #f87171;
 	--ui-toggle-bg: rgba(255, 255, 255, 0.1);
-
-
 
 	/* ===== Font Sizes - Using clamp for responsive scaling ===== */
 	/* Naming convention: --fs-{size} where size is increasing number from smallest to largest */
@@ -47,18 +43,6 @@
 	--fs-3xl: clamp(2.25rem, calc(2rem + 1.2vw), 2.9rem);
 	/* 3X Large, page titles */
 
-	/* ===== Line Heights ===== */
-	--lh-tight: 1.1;
-	/* For headings */
-	--lh-snug: 1.3;
-	/* For subheadings */
-	--lh-normal: 1.5;
-	/* For most text */
-	--lh-relaxed: 1.7;
-	/* For body text */
-	--lh-loose: 2;
-	/* For spaced content */
-
 	/* ===== Font Weights ===== */
 	--fw-light: 300;
 	--fw-normal: 400;
@@ -66,26 +50,17 @@
 	--fw-semibold: 600;
 	--fw-bold: 700;
 
-	/* ===== Letter Spacing ===== */
-	--ls-tight: -0.01em;
-	--ls-normal: 0;
-	--ls-wide: 0.02em;
-	--ls-wider: 0.05em;
-
 	/* Effects */
 	--transition-standard: 250ms ease;
 	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
-	--shadow-md:
-		0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-	--shadow-lg:
-		0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+	--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
 	--glow-accent: 0 0 15px rgba(209, 123, 70, 0.3);
 
 	/* Font Settings */
 	--font-primary: 'Alegreya', 'Crimson Text', serif;
 	--font-secondary: 'Roboto Condensed', 'Open Sans Condensed', 'Noto Sans', sans-serif;
 	--font-mono: 'Menlo', 'Monaco', 'Consolas', monospace;
-
 }
 
 .separator {

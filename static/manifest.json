@@ -1,6 +1,6 @@
 {
     "name": "Oriath Scales",
-    "id": "fabledmythsfullscreen",
+    "id": "oriathscalesfullscreen",
     "start_url": "/?utm_source=web_app_manifest_full",
     "short_name": "OriathScales",
     "scope": "/",
@@ -9,9 +9,9 @@
     "background_color": "#1F2937",
     "display": "fullscreen",
     "categories": [
-        "books",
-        "entertainment",
-        "social"
+        "poe2",
+        "path of exiles 2",
+        "price checker"
     ],
     "display_override": [
         "fullscreen",

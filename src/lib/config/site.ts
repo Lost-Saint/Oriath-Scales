@@ -2,22 +2,22 @@ import { defineSiteConfig } from '$lib/utils/use-site-config.svelte';
 
 export const siteConfig = defineSiteConfig({
 	name: 'Oriath Scales',
-	url: 'https://oriathscales.com', // adjust as needed
+	url: 'https://oriathscales.com',
 	description:
 		'Copy and paste Path of Exile 2 items to instantly search the official trade website. Parse item stats, mods, and requirements with one click. Fast PoE2 trade tool.',
 	ogImage: {
-		url: 'https://oriathscales.com/og.png', // adjust path
+		url: 'https://oriathscales.com/og.png',
 		height: '630',
 		width: '1200'
 	},
 	author: 'lost-saint',
 	license: {
-		name: '', // if open source
-		url: 'https://github.com/YOUR_REPO/LICENSE' // adjust if needed
+		name: 'GLWTS',
+		url: 'https://github.com/Lost-Saint/Oriath-Scales/blob/main/LICENSE.md'
 	},
 	links: {
 		x: 'https://x.com/TomeOfTrade',
-		github: 'https://github.com/YOUR_REPO' // adjust if applicable
+		github: 'https://github.com/Lost-Saint/Oriath-Scales'
 	},
 	keywords: [
 		'Path of Exile 2',

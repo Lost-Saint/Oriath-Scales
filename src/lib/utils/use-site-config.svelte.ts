@@ -1,4 +1,4 @@
-import { getContext, hasContext, setContext } from "svelte";
+import { getContext, hasContext, setContext } from 'svelte';
 
 export type SiteConfig = {
 	name: string;
@@ -34,7 +34,7 @@ class SiteConfigState {
 	constructor(readonly getProps: () => SiteConfig) {}
 }
 
-const SITE_CONFIG_KEY = Symbol("sveco-site-config");
+const SITE_CONFIG_KEY = Symbol('sveco-site-config');
 
 export function useSiteConfig(getProps?: () => SiteConfig): SiteConfigState {
 	if (getProps) {
@@ -43,7 +43,7 @@ export function useSiteConfig(getProps?: () => SiteConfig): SiteConfigState {
 		return getContext(SITE_CONFIG_KEY);
 	} else {
 		throw new Error(
-			"useSiteConfig must be called with a function that returns a SiteConfigProps object"
+			'useSiteConfig must be called with a function that returns a SiteConfigProps object'
 		);
 	}
 }
