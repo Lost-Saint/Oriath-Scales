@@ -20,7 +20,7 @@
 
 		/* Bundled projects */
 		"lib": ["es2022", "dom", "dom.iterable"],
-    	"moduleResolution": "Bundler",
+		"moduleResolution": "Bundler",
 		"incremental": true,
 
 		/* EMIT RULES */
@@ -28,8 +28,8 @@
 		"declaration": true,
 		"declarationMap": true,
 		"sourceMap": true,
-		"removeComments": true,
-    },
+		"removeComments": true
+	}
 	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
 	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
 	//

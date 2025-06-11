@@ -1,17 +1,18 @@
 <script lang="ts">
-	import SkipLink from '$lib/components/SkipLink.svelte';
-	import type { Snippet } from 'svelte';
 	import '../styles/index.css';
+	import Metadata from '$lib/components/metadata.svelte';
+	import SkipLink from '$lib/components/SkipLink.svelte';
+	import { useSiteConfig } from '$lib/utils/use-site-config.svelte.js';
+	import { siteConfig } from '$lib/config/site.js';
 
-	let { children }: { children?: Snippet } = $props();
+	let { children } = $props();
+	useSiteConfig(() => siteConfig);
 </script>
 
+<Metadata />
 <SkipLink href="#main" />
-
 <main class="flow content-grid" id="main">
-	{#if children}
-		{@render children()}
-	{/if}
+	{@render children?.()}
 </main>
 
 <footer class="full-width">

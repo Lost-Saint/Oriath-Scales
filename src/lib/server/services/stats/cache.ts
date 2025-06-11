@@ -1,5 +1,5 @@
-import type { StatsResult } from '$lib/types/stats';
-import { tryCatch } from '$lib/utils/error';
+import type { StatsResult } from '$lib/types/stats.js';
+import { tryCatch } from '$lib/utils/error.js';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 

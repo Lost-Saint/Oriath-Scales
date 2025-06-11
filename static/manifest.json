@@ -1,10 +1,10 @@
 {
-    "name": "Firmament",
+    "name": "Oriath Scales",
     "id": "fabledmythsfullscreen",
     "start_url": "/?utm_source=web_app_manifest_full",
-    "short_name": "Firmament",
+    "short_name": "OriathScales",
     "scope": "/",
-    "description": "Beautiful free reader and a big database for novrls (fanfics).",
+    "description": "Copy and paste Path of Exile 2 items to instantly search the official trade website. Parse item stats, mods, and requirements with one click. Fast PoE2 trade tool.",
     "theme_color": "#ff3e00",
     "background_color": "#1F2937",
     "display": "fullscreen",

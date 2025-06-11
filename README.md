@@ -1,15 +1,13 @@
 <div align="center">
 
-<a href="https://kotatsu.app">
-    <img src="./.github/assets/vtuber.png" alt="Kuraka Logo" title="Kuraka" width="600"/>
+<a href="https://oriathscales.com">
+    <img src="./.github/assets/vtuber.png" alt="Oriath
+    Scales Logo" title="Oriath Scales" width="600"/>
 </a>
 
-# [Kuraka](https://kotatsu.app)
+# [Oriath Scales](https://oriathscales.com)
 
-**[Kuraka](https://github.com/KotatsuApp/Kotatsu) is a free and open-source manga reader for Android with built-in online content sources.**
-
-![Downloads count](https://img.shields.io/github/downloads/KotatsuApp/Kotatsu/total?color=1976d2) ![Latest Stable version](https://img.shields.io/github/v/release/KotatsuApp/Kotatsu?color=2596be&label=latest) ![Android 5.0](https://img.shields.io/badge/android-5.0+-brightgreen) [![Sources count](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2FKotatsuApp%2Fkotatsu-parsers%2Frefs%2Fheads%2Fmaster%2F.github%2Fsummary.yaml&query=total&label=manga%20sources&color=%23E9321C)](https://github.com/KotatsuApp/kotatsu-parsers) [![weblate](https://hosted.weblate.org/widgets/kotatsu/-/strings/svg-badge.svg)](https://hosted.weblate.org/engage/kotatsu/) [![Discord](https://img.shields.io/discord/898363402467045416?color=5865f2&label=discord)](https://discord.gg/NNJ5RgVBC5) [![Telegram](https://img.shields.io/badge/chat-telegram-60ACFF?)](https://t.me/kotatsuapp) [![License](https://img.shields.io/github/license/KotatsuApp/Kotatsu)](https://github.com/KotatsuApp/Kotatsu/blob/devel/LICENSE)
-
+**[Oriath Scales](https://github.com/Lost-Saint/Oriath-Scales) is a free and open-source poe2 price checker.**
 
 ### Main Features
 
@@ -46,15 +44,15 @@
 
 ### Localization
 
-**[Kuraka](https://github.com/KotatsuApp/Kotatsu) is localized in a number of different languages.**  
-**📌 If you would like to help improve these or add new languages,  
+**[Oriath Scales](https://github.com/Lost-Saint/Oriath-Scales) is localized in a number of different languages.**
+**📌 If you would like to help improve these or add new languages,
 please head over to the [Weblate project page](https://hosted.weblate.org/engage/kotatsu/)**
 
 ### Contributing
 
 </br>
 
-**📌 Pull requests are welcome, if you want: See [CONTRIBUTING.md](https://github.com/KotatsuApp/Kotatsu/blob/devel/CONTRIBUTING.md) for the guidelines**
+**📌 Pull requests are welcome, if you want: See [CONTRIBUTING.md](https://github.com/Lost-Saint/Oriath-Scales/blob/devel/CONTRIBUTING.md) for the guidelines**
 
 ### disclaimer
 

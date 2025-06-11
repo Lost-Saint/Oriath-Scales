@@ -1,5 +1,5 @@
-import type { StatGroup, StatOption } from '$lib/types/utils';
-import { tryCatch } from '$lib/utils/error';
+import type { StatGroup, StatOption } from '$lib/types/utils.js';
+import { tryCatch } from '$lib/utils/error.js';
 import Fuse from 'fuse.js';
 
 let statsCache: StatOption[] | null = null;

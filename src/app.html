@@ -3,12 +3,16 @@
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="manifest" href="%sveltekit.assets%/manifest.json" />
 
-		<title>Tome of Trade - Path of Exile Item Parser</title>
-    <meta name="description" content="Copy and paste Path of Exile items to search the official trade website" />
-		<script defer src="https://cloud.umami.is/script.js" data-website-id="ff1ab351-2413-4ccb-9059-dc8429ab50ae"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="rgb(249, 250, 251)" />
 		%sveltekit.head%
+		<script
+			defer
+			src="https://cloud.umami.is/script.js"
+			data-website-id="ff1ab351-2413-4ccb-9059-dc8429ab50ae"
+		></script>
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>

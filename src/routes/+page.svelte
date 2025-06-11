@@ -1,7 +1,6 @@
 <script lang="ts">
 	import ItemChecker from '$lib/components/ItemChecker.svelte';
 	import LeagueSelector from '$lib/components/LeagueSelector.svelte';
-	import SEO from '$lib/components/Seo.svelte';
 	import Tip from '$lib/components/tip.svelte';
 
 	let selectedLeague = 'Dawn of the Hunt';
@@ -11,17 +10,10 @@
 	}
 </script>
 
-<SEO
-	league={selectedLeague}
-	title="Tome of Trade - PoE2 Item Checker for {selectedLeague}"
-	description="Copy and paste Path of Exile 2 items to search the official trade website. Currently supporting {selectedLeague} league items."
-/>
-
 <section class="full-width flow">
 	<div class="title-wrapper">
 		<div class="title-content">
-			<h1>Tome of Trade</h1>
-			<p class="subtitle">PoE2 Item Checker</p>
+			<h1>Oriath Scales</h1>
 		</div>
 	</div>
 
@@ -44,6 +36,7 @@
 			<div class="links-buttons">
 				<a
 					class="link-github"
+					data-umami-event="github link"
 					href="https://github.com/Lost-Saint/Tome-of-Trade"
 					target="_blank"
 					rel="noopener noreferrer"
@@ -58,6 +51,7 @@
 				</a>
 				<a
 					class="link-coffee"
+					data-umami-event="buymecoffee link"
 					href="https://buymeacoffee.com/lost.saint"
 					target="_blank"
 					rel="noopener noreferrer"
@@ -99,14 +93,6 @@
 		color: var(--text-primary);
 		font-size: 2.5rem;
 		font-weight: 700;
-	}
-
-	.subtitle {
-		color: var(--text-secondary);
-		font-family: var(--font-secondary);
-		font-size: 1.25rem;
-		margin-bottom: 0.5rem;
-		font-weight: 500;
 	}
 
 	/* Content Layout */

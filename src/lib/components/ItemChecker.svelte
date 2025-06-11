@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { fetchStats, findStatId, extractValue } from '../utils/stats';
-	import { ITEM_CLASS_MAP } from '../constants/itemTypes';
-	import type { ParsedItem } from '../types/item';
+	import { fetchStats, findStatId, extractValue } from '../utils/stats.js';
+	import { ITEM_CLASS_MAP } from '../constants/itemTypes.js';
+	import type { ParsedItem } from '../types/item.js';
 
 	export let league: string;
 
@@ -336,7 +336,12 @@
 		</button>
 	</div>
 
-	<button class="search-button" on:click={handleSearch} disabled={loading}>
+	<button
+		class="search-button"
+		data-umami-event="Search button"
+		on:click={handleSearch}
+		disabled={loading}
+	>
 		{#if loading}
 			<div class="loading-indicator">
 				<svg class="spinner" viewBox="0 0 24 24">

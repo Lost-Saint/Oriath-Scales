@@ -1,5 +1,5 @@
-import type { RateLimitCheck, RateLimitState, RateLimitTier } from '$lib/types/trade';
-import { tryCatch } from '$lib/utils/error';
+import type { RateLimitCheck, RateLimitState, RateLimitTier } from '$lib/types/trade.js';
+import { tryCatch } from '$lib/utils/error.js';
 
 function createDefaultTiers(): RateLimitTier[] {
 	const now = Date.now();

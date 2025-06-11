@@ -1,5 +1,5 @@
-import type { TradeApiResponse, TradeSearchRequest } from '$lib/types/trade';
-import { tryCatch } from '$lib/utils/error';
+import type { TradeApiResponse, TradeSearchRequest } from '$lib/types/trade.js';
+import { tryCatch } from '$lib/utils/error.js';
 
 const BASE_URL = import.meta.env.VITE_POE_PROXY_URL || 'https://www.pathofexile.com';
 const HEADERS = {
