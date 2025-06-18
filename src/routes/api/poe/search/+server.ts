@@ -1,29 +1,28 @@
 import { searchPoETrades } from '$lib/server/services/trade/api';
 import { rateLimitService } from '$lib/server/services/trade/rateLimit';
 import type { ErrorResponse, TradeSearchRequest } from '$lib/types/trade';
-import { tryCatch } from '$lib/utils/error';
+import { attempt } from '$lib/utils/attempt';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const rateLimitCheck = rateLimitService.checkAndIncrementLimit();
-	const isRateLimited = !rateLimitCheck.allowed;
-
-	if (isRateLimited) {
+	if (!rateLimitCheck.allowed) {
 		const timeToWait = rateLimitCheck.timeToWait;
-		const rateLimitError: ErrorResponse = {
-			error: 'Rate limit exceeded',
-			details: `Please wait ${timeToWait} seconds before trying again`,
-			retryAfter: timeToWait,
-			rateLimitStatus: rateLimitService.getStatus()
-		};
-		return json(rateLimitError, { status: 429 });
+		return createErrorResponse(
+			{
+				error: 'Rate limit exceeded',
+				details: `Please wait ${timeToWait} seconds before trying again`,
+				retryAfter: timeToWait,
+				rateLimitStatus: rateLimitService.getStatus()
+			},
+			429
+		);
 	}
 
-	const bodyResult = await tryCatch(request.json());
-	const bodyParseError = bodyResult.error;
-	if (bodyParseError) {
-		console.error('Error parsing request body:', bodyParseError);
+	const [bodyError, searchRequest] = await attempt<Error, TradeSearchRequest>(request.json());
+	if (bodyError) {
+		console.error('Error parsing request body:', bodyError);
 		return createErrorResponse(
 			{
 				error: 'Invalid request',
@@ -33,10 +32,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		);
 	}
 
-	const searchRequest = bodyResult.data as TradeSearchRequest;
-	const searchResult = await tryCatch(searchPoETrades(searchRequest));
-	const searchError = searchResult.error;
-
+	const [searchError, searchResult] = await attempt(searchPoETrades(searchRequest));
 	if (searchError) {
 		console.error('Error in trade search:', searchError);
 		const errorMessage = searchError instanceof Error ? searchError.message : String(searchError);
@@ -49,60 +45,61 @@ export const POST: RequestHandler = async ({ request }) => {
 		);
 	}
 
-	const { response, data } = searchResult.data;
+	const { response, data } = searchResult;
 	rateLimitService.updateFromHeaders(response.headers);
 
-	const responseNotOk = !response.ok;
-	if (responseNotOk) {
-		const isRateLimitError = response.status === 429;
-		if (isRateLimitError) {
-			const retryAfterFromService = rateLimitService.getRetryAfterFromHeaders(response.headers);
-			const retryAfterFromHeader = response.headers.get('Retry-After');
-			const retryAfter = retryAfterFromService || parseInt(retryAfterFromHeader || '10');
-
-			rateLimitService.setRestriction(retryAfter);
-
-			console.log(`[Rate Limits] API returned 429 - ${rateLimitService.getStatus()}`);
-			return createErrorResponse(
-				{
-					error: 'Rate limit exceeded',
-					details: `Please wait ${retryAfter} seconds`,
-					retryAfter,
-					rateLimitStatus: rateLimitService.getStatus()
-				},
-				429
-			);
-		}
-
-		const isForbiddenError = response.status === 403;
-		if (isForbiddenError) {
-			console.error('API Access Forbidden:', {
-				status: response.status,
-				statusText: response.statusText,
-				headers: Object.fromEntries(response.headers.entries())
-			});
-			return createErrorResponse(
-				{
-					error: 'API Access Forbidden',
-					details:
-						'The PoE Trade API is currently blocking requests from this service. Please try using the official trade site directly.'
-				},
-				403
-			);
-		}
-
-		const httpError = `API Error: ${response.status}`;
-		return createErrorResponse(
-			{
-				error: httpError,
-				details: response.statusText
-			},
-			response.status
-		);
+	if (!response.ok) {
+		return handleApiError(response);
 	}
 
 	return json(data);
 };
+
+function handleApiError(response: Response): Response {
+	if (response.status === 429) {
+		const retryAfterFromService = rateLimitService.getRetryAfterFromHeaders(response.headers);
+		const retryAfterFromHeader = response.headers.get('Retry-After');
+		const retryAfter = retryAfterFromService || parseInt(retryAfterFromHeader || '10');
+
+		rateLimitService.setRestriction(retryAfter);
+		console.log(`[Rate Limits] API returned 429 - ${rateLimitService.getStatus()}`);
+
+		return createErrorResponse(
+			{
+				error: 'Rate limit exceeded',
+				details: `Please wait ${retryAfter} seconds`,
+				retryAfter,
+				rateLimitStatus: rateLimitService.getStatus()
+			},
+			429
+		);
+	}
+
+	if (response.status === 403) {
+		console.error('API Access Forbidden:', {
+			status: response.status,
+			statusText: response.statusText,
+			headers: Object.fromEntries(response.headers.entries())
+		});
+
+		return createErrorResponse(
+			{
+				error: 'API Access Forbidden',
+				details:
+					'The PoE Trade API is currently blocking requests from this service. Please try using the official trade site directly.'
+			},
+			403
+		);
+	}
+
+	return createErrorResponse(
+		{
+			error: `API Error: ${response.status}`,
+			details: response.statusText
+		},
+		response.status
+	);
+}
 
 function createErrorResponse(data: ErrorResponse, status: number): Response {
 	return json(data, { status });

@@ -1,5 +1,5 @@
 import type { StatsResult } from '$lib/types/stats.js';
-import { tryCatch } from '$lib/utils/error.js';
+import { attempt } from '$lib/utils/attempt.js';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 
@@ -25,17 +25,16 @@ export async function getStatsFromCache(
 	let cachedData: StatsResult | null = null;
 	let shouldRefresh = true;
 
-	const mkdirResult = await tryCatch(fs.mkdir(cacheDir, { recursive: true }));
-	if (mkdirResult.error) {
-		console.warn('Could not create cache directory:', mkdirResult.error);
+	const [mkdirError] = await attempt(fs.mkdir(cacheDir, { recursive: true }));
+	if (mkdirError) {
+		console.warn('Could not create cache directory:', mkdirError);
 	}
 
-	const readResult = await tryCatch(fs.readFile(cachePath, 'utf-8'));
-	const cacheFileExists = !readResult.error;
+	const [readError, rawCacheContent] = await attempt(fs.readFile(cachePath, 'utf-8'));
+	const cacheFileExists = !readError;
 
 	if (cacheFileExists) {
-		const rawCacheContent = readResult.data;
-		const parseResult = tryCatch<CacheData>(() => {
+		const [parseError, cacheData] = attempt<Error, CacheData>(() => {
 			const parsed = JSON.parse(rawCacheContent);
 			const hasRequiredFields =
 				parsed &&
@@ -49,8 +48,7 @@ export async function getStatsFromCache(
 			return parsed as CacheData;
 		});
 
-		if (!parseResult.error) {
-			const cacheData = parseResult.data;
+		if (!parseError) {
 			const cacheTimestamp = new Date(cacheData.lastUpdated).getTime();
 			const cacheAge = now - cacheTimestamp;
 
@@ -67,7 +65,7 @@ export async function getStatsFromCache(
 				console.warn('Cache has invalid timestamp, treating as expired');
 			}
 		} else {
-			console.warn('Failed to parse cache JSON:', parseResult.error);
+			console.warn('Failed to parse cache JSON:', parseError);
 		}
 	} else {
 		console.log('No cache file found, will need fresh data');
@@ -81,10 +79,10 @@ export async function getStatsFromCache(
 
 		const jsonToWrite = JSON.stringify(cacheDataToWrite, null, 2);
 
-		const writeResult = await tryCatch(fs.writeFile(cachePath, jsonToWrite, 'utf-8'));
+		const [writeError] = await attempt(fs.writeFile(cachePath, jsonToWrite, 'utf-8'));
 
-		if (writeResult.error) {
-			console.error('Failed to write stats cache:', writeResult.error);
+		if (writeError) {
+			console.error('Failed to write stats cache:', writeError);
 			return;
 		}
 

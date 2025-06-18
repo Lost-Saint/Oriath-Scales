@@ -1,5 +1,5 @@
 import type { TradeApiResponse, TradeSearchRequest } from '$lib/types/trade.js';
-import { tryCatch } from '$lib/utils/error.js';
+import { attempt } from '$lib/utils/attempt.js';
 
 const BASE_URL = import.meta.env.VITE_POE_PROXY_URL || 'https://www.pathofexile.com';
 const HEADERS = {
@@ -9,7 +9,7 @@ const HEADERS = {
 };
 
 async function makeTradeRequest(url: string, body: string): Promise<Response> {
-	const fetchResult = await tryCatch(
+	const [fetchError, response] = await attempt(
 		fetch(url, {
 			method: 'POST',
 			headers: HEADERS,
@@ -17,33 +17,30 @@ async function makeTradeRequest(url: string, body: string): Promise<Response> {
 		})
 	);
 
-	const fetchFailed = fetchResult.error !== null;
-	if (fetchFailed) {
-		const errorMessage = `Connection failed: ${fetchResult.error.message}`;
+	if (fetchError) {
+		const errorMessage = `Connection failed: ${fetchError.message}`;
 		console.error('Trade API connection failed:', {
 			url,
-			error: fetchResult.error.message
+			error: fetchError.message
 		});
 		throw new Error(errorMessage);
 	}
 
-	return fetchResult.data;
+	return response;
 }
 
 async function parseTradeResponse(response: Response, url: string): Promise<TradeApiResponse> {
-	const jsonResult = await tryCatch(response.json());
-	const parseFailed = jsonResult.error !== null;
+	const [jsonError, data] = await attempt(response.json());
 
-	if (parseFailed) {
-		const errorMessage = `JSON parse failed: ${jsonResult.error.message}`;
+	if (jsonError) {
+		const errorMessage = `JSON parse failed: ${jsonError.message}`;
 		console.error('Trade API JSON parse failed:', {
 			url,
-			error: jsonResult.error.message
+			error: jsonError.message
 		});
 		throw new Error(errorMessage);
 	}
 
-	const data = jsonResult.data;
 	const dataIsValid = data && typeof data === 'object';
 
 	if (!dataIsValid) {
@@ -86,19 +83,18 @@ export async function searchPoETrades(request: TradeSearchRequest): Promise<{
 		);
 	}
 
-	const parseResult = await tryCatch(parseTradeResponse(response, searchUrl));
+	const [parseError, data] = await attempt(parseTradeResponse(response, searchUrl));
 
-	if (parseResult.error !== null) {
+	if (parseError) {
 		console.error('Failed to parse trade response:', {
-			error: parseResult.error.message,
+			error: parseError.message,
 			url: searchUrl,
 			league: request.league,
 			requestTime
 		});
-		throw parseResult.error;
+		throw parseError;
 	}
 
-	const data = parseResult.data;
 	const dataHasSearchId = Boolean(data.id);
 
 	if (!dataHasSearchId) {

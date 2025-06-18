@@ -1,8 +1,8 @@
-import type { StatsResult } from '$lib/types/stats.js';
-import { tryCatch } from '$lib/utils/error.js';
+import type { StatsResult } from '$lib/types/stats';
+import { attempt } from '$lib/utils/attempt';
 
 export async function fetchPoEStats(): Promise<StatsResult> {
-	const response = await tryCatch(
+	const [fetchError, response] = await attempt(
 		fetch('https://www.pathofexile.com/api/trade2/data/stats', {
 			headers: {
 				'User-Agent': 'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
@@ -11,24 +11,19 @@ export async function fetchPoEStats(): Promise<StatsResult> {
 		})
 	);
 
-	if (response.error) {
-		throw new Error(`Failed to fetch PoE stats: Connection error: ${response.error.message}`);
+	if (fetchError) {
+		throw new Error(`Failed to fetch PoE stats: Connection error: ${fetchError.message}`);
 	}
 
-	const fetchResult = response.data;
-	if (!fetchResult || !fetchResult.ok) {
-		const httpError = fetchResult
-			? `HTTP ${fetchResult.status}: ${fetchResult.statusText}`
-			: 'No response object';
-		throw new Error(`Failed to fetch PoE stats: ${httpError}`);
+	if (!response.ok) {
+		throw new Error(`Failed to fetch PoE stats: HTTP ${response.status}: ${response.statusText}`);
 	}
 
-	const jsonResult = await tryCatch(fetchResult.json());
-	if (jsonResult.error) {
-		throw new Error(`Failed to parse stats response: ${jsonResult.error.message}`);
+	const [jsonError, statsData] = await attempt(response.json());
+	if (jsonError) {
+		throw new Error(`Failed to parse stats response: ${jsonError.message}`);
 	}
 
-	const statsData = jsonResult.data;
 	if (!statsData || !Array.isArray(statsData.result)) {
 		throw new Error('Invalid API response: missing or invalid "result" array');
 	}

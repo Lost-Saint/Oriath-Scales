@@ -1,5 +1,5 @@
 import type { RateLimitCheck, RateLimitState, RateLimitTier } from '$lib/types/trade.js';
-import { tryCatch } from '$lib/utils/error.js';
+import { attempt } from '$lib/utils/attempt.js';
 
 function createDefaultTiers(): RateLimitTier[] {
 	const now = Date.now();
@@ -139,7 +139,7 @@ export class RateLimitService {
 	updateFromHeaders(headers: Headers): void {
 		const parseStartTime = Date.now();
 
-		const rulesResult = tryCatch(() => {
+		const [rulesError, rulesToCheck] = attempt(() => {
 			const rulesHeader = headers.get('X-Rate-Limit-Rules');
 			const hasRulesHeader = rulesHeader !== null && rulesHeader.trim().length > 0;
 
@@ -152,31 +152,30 @@ export class RateLimitService {
 			return ['ip'];
 		});
 
-		if (rulesResult.error) {
-			console.warn('[Rate Limits] Failed to parse rules header:', rulesResult.error.message);
+		if (rulesError) {
+			console.warn('[Rate Limits] Failed to parse rules header:', rulesError.message);
 			console.log(`[Rate Limits] ${this.getStatus()}`);
 			return;
 		}
 
-		const rulesToCheck = rulesResult.data;
 		let updatedSuccessfully = false;
 		let parsedTiersCount = 0;
 
 		for (const rule of rulesToCheck) {
-			const headerResult = tryCatch(() => ({
+			const [headerError, headerData] = attempt(() => ({
 				ruleHeader: headers.get(`X-Rate-Limit-${rule}`),
 				stateHeader: headers.get(`X-Rate-Limit-${rule}-State`)
 			}));
 
-			if (headerResult.error) {
+			if (headerError) {
 				console.warn(
 					`[Rate Limits] Failed to access headers for rule ${rule}:`,
-					headerResult.error.message
+					headerError.message
 				);
 				continue;
 			}
 
-			const { ruleHeader, stateHeader } = headerResult.data;
+			const { ruleHeader, stateHeader } = headerData;
 			const hasRequiredHeaders = ruleHeader !== null && stateHeader !== null;
 
 			if (!hasRequiredHeaders) {
@@ -210,7 +209,7 @@ export class RateLimitService {
 		ruleHeader: string,
 		stateHeader: string
 	): { success: boolean; tiersUpdated: number } {
-		const parseResult = tryCatch(() => ({
+		const [parseError, headerData] = attempt(() => ({
 			rules: ruleHeader
 				.split(',')
 				.map((r) => r.trim())
@@ -221,12 +220,12 @@ export class RateLimitService {
 				.filter(Boolean)
 		}));
 
-		if (parseResult.error) {
-			console.warn('[Rate Limits] Failed to split header strings:', parseResult.error.message);
+		if (parseError) {
+			console.warn('[Rate Limits] Failed to split header strings:', parseError.message);
 			return { success: false, tiersUpdated: 0 };
 		}
 
-		const { rules, states } = parseResult.data;
+		const { rules, states } = headerData;
 		const now = Date.now();
 		let tiersUpdated = 0;
 
@@ -240,20 +239,20 @@ export class RateLimitService {
 				continue;
 			}
 
-			const splitResult = tryCatch(() => ({
+			const [splitError, splitData] = attempt(() => ({
 				ruleParts: rule.split(':').map((p) => p.trim()),
 				stateParts: state.split(':').map((p) => p.trim())
 			}));
 
-			if (splitResult.error) {
+			if (splitError) {
 				console.warn(
 					`[Rate Limits] Failed to parse rule/state parts at index ${i}:`,
-					splitResult.error.message
+					splitError.message
 				);
 				continue;
 			}
 
-			const { ruleParts, stateParts } = splitResult.data;
+			const { ruleParts, stateParts } = splitData;
 			const hasEnoughParts = ruleParts.length >= 3 && stateParts.length >= 3;
 
 			if (!hasEnoughParts) {
