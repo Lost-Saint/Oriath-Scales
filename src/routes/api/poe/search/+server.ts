@@ -1,9 +1,9 @@
-import { searchPoETrades } from '$lib/server/services/trade/api';
-import { rateLimitService } from '$lib/server/services/trade/rateLimit';
-import type { ErrorResponse, TradeSearchRequest } from '$lib/types/trade';
-import { attempt } from '$lib/utils/attempt';
+import { searchPoETrades } from '$lib/server/services/trade/api.js';
+import { rateLimitService } from '$lib/server/services/trade/rateLimit.js';
+import type { ErrorResponse, TradeSearchRequest } from '$lib/types/trade.js';
+import { attempt } from '$lib/utils/attempt.js';
 import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
+import type { RequestHandler } from './$types.js';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const rateLimitCheck = rateLimitService.checkAndIncrementLimit();

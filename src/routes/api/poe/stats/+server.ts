@@ -1,8 +1,8 @@
-import { fetchPoEStats } from '$lib/server/services/stats/api';
-import { getStatsFromCache } from '$lib/server/services/stats/cache';
-import { attempt } from '$lib/utils/attempt';
+import { fetchPoEStats } from '$lib/server/services/stats/api.js';
+import { getStatsFromCache } from '$lib/server/services/stats/cache.js';
+import { attempt } from '$lib/utils/attempt.js';
 import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
+import type { RequestHandler } from './$types.js';
 
 const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 const CACHE_DURATION_SECONDS = 24 * 60 * 60; // 24 hours in seconds for HTTP headers

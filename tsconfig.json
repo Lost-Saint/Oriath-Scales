@@ -6,6 +6,7 @@
 		"skipLibCheck": true,
 		"target": "es2022",
 		"allowJs": true,
+		"checkJs": true,
 		"resolveJsonModule": true,
 		"moduleDetection": "force",
 		"isolatedModules": true,
@@ -14,19 +15,22 @@
 		/* Strictness */
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
-		"checkJs": true,
 		"forceConsistentCasingInFileNames": true,
 		"noErrorTruncation": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"useUnknownInCatchVariables": true,
 
 		/* Bundled projects */
-		"lib": ["es2022", "dom", "dom.iterable"],
-		"moduleResolution": "Bundler",
+		"moduleResolution": "NodeNext",
+		"module": "NodeNext",
 		"incremental": true,
 
 		/* EMIT RULES */
-		"outDir": "dist",
-		"declaration": true,
-		"declarationMap": true,
+		"noEmit": true,
 		"sourceMap": true,
 		"removeComments": true
 	}

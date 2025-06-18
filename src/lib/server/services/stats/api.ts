@@ -1,5 +1,5 @@
-import type { StatsResult } from '$lib/types/stats';
-import { attempt } from '$lib/utils/attempt';
+import type { StatsResult } from '$lib/types/stats.js';
+import { attempt } from '$lib/utils/attempt.js';
 
 export async function fetchPoEStats(): Promise<StatsResult> {
 	const [fetchError, response] = await attempt(
