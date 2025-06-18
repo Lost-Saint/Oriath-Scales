@@ -13,18 +13,13 @@ const config = {
 		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 		adapter: adapter(),
 
-        paths: {
-			base: process.env.APP_BASE || "",
-			relative: false,
-		},
-
-        csp: {
+		csp: {
 			directives: {
-				...(process.env.ALLOW_IFRAME === "true" ? {} : { "frame-ancestors": ["'none'"] }),
-			},
-		},
-    },
-    compilerOptions: {
+				...(process.env.ALLOW_IFRAME === 'true' ? {} : { 'frame-ancestors': ["'none'"] })
+			}
+		}
+	},
+	compilerOptions: {
 		enableSourcemap: true
 	}
 };

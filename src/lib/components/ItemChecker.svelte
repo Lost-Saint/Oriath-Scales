@@ -49,12 +49,11 @@
 			} else if (line.startsWith('Item Level:')) {
 				const match = line.match(/Item Level: (\d+)/);
 				if (match && match[1]) {
-					itemLevel = parseInt(match[1], 10); // Added radix parameter
+					itemLevel = parseInt(match[1], 10);
 					foundItemLevel = true;
 				}
 			} else if (line.startsWith('Rarity:')) {
 				rarity = line.replace('Rarity:', '').trim();
-				// Check for Unique item name and base type in the next lines
 				if (rarity === 'Unique' && i + 2 < lines.length) {
 					const nextLine = lines[i + 1];
 					const nextNextLine = lines[i + 2];
@@ -66,7 +65,6 @@
 					foundStats = true;
 				}
 			} else if (foundStats && line && !line.includes('--------')) {
-				// Add line to stats if it contains numbers, modifiers, or other relevant patterns
 				if (
 					line.match(/[0-9]+/) ||
 					line.includes('to ') ||
@@ -105,7 +103,6 @@
 				return;
 			}
 
-			// Create base query structure
 			const baseQuery = {
 				query: {
 					status: { option: 'online' },
@@ -114,7 +111,6 @@
 				sort: { price: 'asc' }
 			};
 
-			// Build the query based on item type
 			let query;
 			if (parsedItem.rarity === 'Unique' && parsedItem.name && parsedItem.baseType) {
 				query = {
@@ -126,17 +122,13 @@
 						filters: {
 							type_filters: {
 								filters: {
-									category: parsedItem.itemClass
-										? {
-												option: ITEM_CLASS_MAP[parsedItem.itemClass]
-											}
-										: undefined,
-									ilvl:
-										parsedItem.itemLevel && includeItemLevel
-											? {
-													min: parsedItem.itemLevel
-												}
-											: undefined
+									...(parsedItem.itemClass && {
+										category: { option: ITEM_CLASS_MAP[parsedItem.itemClass] }
+									}),
+									...(parsedItem.itemLevel &&
+										includeItemLevel && {
+											ilvl: { min: parsedItem.itemLevel }
+										})
 								},
 								disabled: false
 							}
@@ -187,31 +179,19 @@
 						filters: {
 							type_filters: {
 								filters: {
-									category: parsedItem.itemClass
-										? {
-												option: ITEM_CLASS_MAP[parsedItem.itemClass]
-											}
-										: undefined,
-									ilvl:
-										parsedItem.itemLevel && includeItemLevel
-											? {
-													min: parsedItem.itemLevel
-												}
-											: undefined
+									...(parsedItem.itemClass && {
+										category: { option: ITEM_CLASS_MAP[parsedItem.itemClass] }
+									}),
+									...(parsedItem.itemLevel &&
+										includeItemLevel && {
+											ilvl: { min: parsedItem.itemLevel }
+										})
 								},
 								disabled: false
 							}
 						}
 					}
 				};
-			}
-
-			// Clean up undefined values
-			if (!parsedItem.itemClass) {
-				delete query.query.filters.type_filters.filters.category;
-			}
-			if (!parsedItem.itemLevel || !includeItemLevel) {
-				delete query.query.filters.type_filters.filters.ilvl;
 			}
 
 			await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY));
@@ -289,16 +269,16 @@
 		e.preventDefault();
 		const text = e.clipboardData?.getData('text') || '';
 		itemText = text;
-		itemDisplayHtml = formatItemText(text);
 	}
 
 	function handleInput(e: Event) {
-		const target = e.target as HTMLDivElement;
-		itemText = target.innerText;
-		itemDisplayHtml = formatItemText(itemText);
+		const target = e.target;
+		if (target instanceof HTMLDivElement) {
+			itemText = target.innerText || '';
+		}
 	}
 
-	$: if (itemText) {
+	$: {
 		itemDisplayHtml = formatItemText(itemText);
 	}
 </script>
@@ -328,9 +308,9 @@
 			id="includeItemLevel"
 			aria-checked={includeItemLevel}
 			aria-labelledby="includeItemLevel-label"
-			on:click={() => (includeItemLevel = !includeItemLevel)}
 			class="toggle-switch"
 			class:active={includeItemLevel}
+			on:click={() => (includeItemLevel = !includeItemLevel)}
 		>
 			<span class="toggle-knob"></span>
 		</button>
@@ -340,7 +320,7 @@
 		class="search-button"
 		data-umami-event="Search button"
 		on:click={handleSearch}
-		disabled={loading}
+		disabled={loading || !isStatsLoaded}
 	>
 		{#if loading}
 			<div class="loading-indicator">

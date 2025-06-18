@@ -46,7 +46,7 @@ please head over to the [Weblate project page](https://hosted.weblate.org/engage
 
 </br>
 
-**📌 Pull requests are welcome, if you want: See [CONTRIBUTING.md](https://github.com/Lost-Saint/Oriath-Scales/blob/devel/CONTRIBUTING.md) for the guidelines**
+**📌 Pull requests are welcome, if you want: See [CONTRIBUTING.md](https://github.com/Lost-Saint/Oriath-Scales/blob/main/CONTRIBUTING.md) for the guidelines**
 
 ### disclaimer
 
