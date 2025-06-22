@@ -40,7 +40,7 @@
 	},
 	"dependencies": {
 		"fuse.js": "^7.1.0",
-		"melt": "^0.35.1"
+		"melt": "^0.35.2"
 	},
 	"engines": {
 		"pnpm": ">=9.0.0",

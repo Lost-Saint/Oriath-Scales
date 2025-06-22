@@ -12,8 +12,8 @@ importers:
         specifier: ^7.1.0
         version: 7.1.0
       melt:
-        specifier: ^0.35.1
-        version: 0.35.1(@floating-ui/dom@1.7.0)(svelte@5.34.7)
+        specifier: ^0.35.2
+        version: 0.35.2(@floating-ui/dom@1.7.0)(svelte@5.34.7)
     devDependencies:
       '@eslint/compat':
         specifier: ^1.3.0
@@ -1000,8 +1000,8 @@ packages:
   magic-string@0.30.17:
     resolution: {integrity: sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==}
 
-  melt@0.35.1:
-    resolution: {integrity: sha512-n6FKpOfxknh1BBZo3ahvhzaSaA/Ky5ZBsae7hmu2q4wd86XH1rUzk2eAquTFKmywtfqPssLOXEpTbs+vXkDNIw==}
+  melt@0.35.2:
+    resolution: {integrity: sha512-iuNHXMX6An+Iy+515J5OpFmryQzy1yEAWsqL5rx1k7X35ajjGHln7ZXOMfpXhEMbbY8xeOx+lT9WHu3/ivUacA==}
     peerDependencies:
       '@floating-ui/dom': ^1.6.0
       svelte: ^5.30.1
@@ -2181,7 +2181,7 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  melt@0.35.1(@floating-ui/dom@1.7.0)(svelte@5.34.7):
+  melt@0.35.2(@floating-ui/dom@1.7.0)(svelte@5.34.7):
     dependencies:
       '@floating-ui/dom': 1.7.0
       dequal: 2.0.3
