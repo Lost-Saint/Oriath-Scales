@@ -27,20 +27,15 @@
 ### In-App Screenshots
 
 <div align="center">
-    <img src="./metadata/en-US/images/phoneScreenshots/1.png" alt="Mobile view" width="250"/>
+    <img src="./metadata/2.jpg" alt="Mobile view" width="250"/>
 </div>
 
 <br>
 
 <div align="center">
-    <img src="./metadata/desktop-1.png" alt="Desktop view" width="400"/>
+    <img src="./metadata/1.png" alt="Desktop view" width="400"/>
 </div>
 
-### Localization
-
-**[Oriath Scales](https://github.com/Lost-Saint/Oriath-Scales) is localized in a number of different languages.**
-**📌 If you would like to help improve these or add new languages,
-please head over to the [Weblate project page](https://hosted.weblate.org/engage/kotatsu/)**
 
 ### Contributing
 
