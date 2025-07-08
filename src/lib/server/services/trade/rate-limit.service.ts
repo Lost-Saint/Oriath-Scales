@@ -3,9 +3,9 @@ import type { RateLimitCheck, RateLimitState, RateLimitTier } from '$lib/types/t
 function createDefaultTiers(): RateLimitTier[] {
 	const now = Date.now();
 	return [
-		{ hits: 0, max: 5, period: 10, lastUpdated: now },
-		{ hits: 0, max: 15, period: 60, lastUpdated: now },
-		{ hits: 0, max: 30, period: 300, lastUpdated: now }
+		{ hits: 0, max: 5, period: 10000, lastUpdated: now },
+		{ hits: 0, max: 15, period: 60000, lastUpdated: now },
+		{ hits: 0, max: 30, period: 300000, lastUpdated: now }
 	];
 }
 
