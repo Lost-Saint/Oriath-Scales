@@ -33,7 +33,7 @@
 <br>
 
 <div align="center">
-    <img src="./metadata/en-US/images/tenInchScreenshots/1.png" alt="Desktop view" width="400"/>
+    <img src="./metadata/desktop-1.png" alt="Desktop view" width="400"/>
 </div>
 
 ### Localization
