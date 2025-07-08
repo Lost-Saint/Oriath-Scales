@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { fetchStats, findStatId, extractValue } from '../utils/stats.js';
-	import { ITEM_CLASS_MAP } from '../constants/itemTypes.js';
-	import type { ParsedItem } from '../types/item.js';
+	import { fetchStats, findStatId, extractValue } from '$lib/utils/stat-utils.js';
+	import { ITEM_CLASS_MAP } from '../constants/item-class-map.js';
+	import type { ParsedItem } from '../types/trade-query.types.js';
 
 	export let league: string;
 

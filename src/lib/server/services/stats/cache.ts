@@ -1,12 +1,7 @@
-import type { StatsResult } from '$lib/types/stats.js';
+import type { StatsResult, CacheData } from '$lib/types/stats.types.js';
 import { attempt } from '$lib/utils/attempt.js';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-
-interface CacheData {
-	data: StatsResult;
-	lastUpdated: string;
-}
 
 interface StatsFromCacheResult {
 	data: StatsResult | null;

@@ -1,10 +1,13 @@
-import type { TradeApiResponse, TradeSearchRequest } from '$lib/types/trade.js';
+import type { TradeApiResponse, TradeSearchRequest } from '$lib/types/trade-api.types.js';
+import { env as envPublic } from '$env/dynamic/public';
 import { attempt } from '$lib/utils/attempt.js';
+
+const contactEmail = envPublic.PUBLIC_EXILE_CONTACT_EMAIL;
 
 const BASE_URL = import.meta.env.VITE_POE_PROXY_URL || 'https://www.pathofexile.com';
 const HEADERS = {
 	'Content-Type': 'application/json',
-	'User-Agent': 'OAuth poe-item-checker/1.0.0 (contact: sanzodown@hotmail.fr)',
+	'User-Agent': `OAuth oriath-scales/1.0.0 (contact: ${contactEmail})`,
 	Accept: '*/*'
 };
 

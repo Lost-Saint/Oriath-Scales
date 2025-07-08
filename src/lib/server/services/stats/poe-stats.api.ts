@@ -1,4 +1,4 @@
-import type { StatsResult } from '$lib/types/stats.js';
+import type { StatsResult } from '$lib/types/stats.types.js';
 import { env as envPublic } from '$env/dynamic/public';
 import { attempt } from '$lib/utils/attempt.js';
 

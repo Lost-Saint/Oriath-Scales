@@ -1,4 +1,4 @@
-import type { StatGroup, StatOption } from '$lib/types/utils.js';
+import type { StatGroup, StatOption } from '$lib/types/stats.types.js';
 import { attempt } from '$lib/utils/attempt.js';
 import Fuse from 'fuse.js';
 

@@ -1,6 +1,6 @@
-import { searchPoETrades } from '$lib/server/services/trade/api.js';
-import { rateLimitService } from '$lib/server/services/trade/rateLimit.js';
-import type { ErrorResponse, TradeSearchRequest } from '$lib/types/trade.js';
+import { searchPoETrades } from '$lib/server/services/trade/poe-trade.api.js';
+import { rateLimitService } from '$lib/server/services/trade/rate-limit.service.js';
+import type { ErrorResponse, TradeSearchRequest } from '$lib/types/trade-api.types.js';
 import { attempt } from '$lib/utils/attempt.js';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types.js';
@@ -8,7 +8,7 @@ import type { RequestHandler } from './$types.js';
 export const POST: RequestHandler = async ({ request }) => {
 	const rateLimitCheck = rateLimitService.checkAndIncrementLimit();
 	if (!rateLimitCheck.allowed) {
-		const timeToWait = rateLimitCheck.timeToWait;
+		const timeToWait = rateLimitCheck.timeToWait || 0;
 		return createErrorResponse(
 			{
 				error: 'Rate limit exceeded',
@@ -57,9 +57,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 function handleApiError(response: Response): Response {
 	if (response.status === 429) {
-		const retryAfterFromService = rateLimitService.getRetryAfterFromHeaders(response.headers);
-		const retryAfterFromHeader = response.headers.get('Retry-After');
-		const retryAfter = retryAfterFromService || parseInt(retryAfterFromHeader || '10');
+		const retryAfter = rateLimitService.getRetryAfterFromHeaders(response.headers) || 10;
 
 		rateLimitService.setRestriction(retryAfter);
 		console.log(`[Rate Limits] API returned 429 - ${rateLimitService.getStatus()}`);

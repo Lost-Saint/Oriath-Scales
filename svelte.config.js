@@ -19,9 +19,6 @@ const config = {
 			}
 		}
 	},
-	compilerOptions: {
-		enableSourcemap: true
-	}
 };
 
 export default config;

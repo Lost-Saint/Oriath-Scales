@@ -2,7 +2,6 @@ export interface RateLimitTier {
 	hits: number;
 	max: number;
 	period: number;
-	restrictedTime: number;
 	lastUpdated: number;
 }
 
@@ -14,6 +13,7 @@ export interface RateLimitCheck {
 	allowed: boolean;
 	timeToWait?: number;
 }
+
 export interface TradeSearchRequest {
 	league: string;
 	query: Record<string, unknown>;

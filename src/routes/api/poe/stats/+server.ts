@@ -1,4 +1,4 @@
-import { fetchPoEStats } from '$lib/server/services/stats/api.js';
+import { fetchPoEStats } from '$lib/server/services/stats/poe-stats.api.js';
 import { getStatsFromCache } from '$lib/server/services/stats/cache.js';
 import { attempt } from '$lib/utils/attempt.js';
 import { json } from '@sveltejs/kit';
