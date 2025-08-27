@@ -193,6 +193,14 @@ function findFuzzyMatch(
 	return null;
 }
 
+enum LogLevel {
+	ERROR,
+	WARN,
+	INFO,
+	DEBUG
+}
+const CURRENT_LOG_LEVEL = LogLevel.DEBUG;
+
 function logMatch(
 	type: string,
 	input: string,
@@ -200,27 +208,29 @@ function logMatch(
 	wasImplicitSearch: boolean,
 	score?: number
 ): void {
-	const logData: Record<string, unknown> = {
-		input,
-		match: match.text,
-		id: match.id,
-		type: match.type,
-		wasImplicitSearch
-	};
-
-	if (score !== undefined) {
-		logData.score = score;
+	if (CURRENT_LOG_LEVEL >= LogLevel.DEBUG) {
+		const logData: Record<string, unknown> = {
+			input,
+			match: match.text,
+			id: match.id,
+			type: match.type,
+			wasImplicitSearch
+		};
+		if (score !== undefined) {
+			logData.score = score;
+		}
+		console.debug(type, logData);
 	}
-
-	console.log(type, logData);
 }
 
 function logNoMatch(input: string, wasImplicitSearch: boolean, statsSearched: number): void {
-	console.log('No match found:', {
-		input,
-		wasImplicitSearch,
-		statsSearched
-	});
+	if (CURRENT_LOG_LEVEL >= LogLevel.DEBUG) {
+		console.debug('No match found:', {
+			input,
+			wasImplicitSearch,
+			statsSearched
+		});
+	}
 }
 
 function createFuseInstance(stats: StatOption[]): Fuse<StatOption> {
@@ -265,16 +275,8 @@ function normalizeStatText(text: string): string {
 		.trim();
 }
 
-export function extractValue(statText: unknown): number {
-	if (typeof statText !== 'string') {
-		return 0;
-	}
-
-	const match = statText.match(/([+-]?\d+\.?\d*)/);
-	if (!match || typeof match[1] !== 'string') {
-		return 0;
-	}
-
-	const value = parseFloat(match[1]);
-	return isFinite(value) ? value : 0;
+export function extractValue(statText: string): number {
+	const matches = statText.match(/([+-]?\d+\.?\d*)/g);
+	if (!matches) return 0;
+	return parseFloat(matches[0]);
 }

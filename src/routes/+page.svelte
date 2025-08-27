@@ -11,12 +11,6 @@
 </script>
 
 <section class="full-width flow">
-	<div class="title-wrapper">
-		<div class="title-content">
-			<h1>Oriath Scales</h1>
-		</div>
-	</div>
-
 	<LeagueSelector {selectedLeague} onLeagueChange={handleLeagueChange} />
 
 	<div class="content-wrapper">
@@ -77,24 +71,6 @@
 </section>
 
 <style>
-	/* Title Section Improvements */
-	.title-wrapper {
-		text-align: center;
-		padding: 60px 0 40px 0;
-	}
-
-	.title-content h1 {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.75rem;
-		margin-bottom: 0.5rem;
-		font-family: var(--font-primary);
-		color: var(--text-primary);
-		font-size: 2.5rem;
-		font-weight: 700;
-	}
-
 	/* Content Layout */
 	.content-wrapper {
 		display: flex;
@@ -194,22 +170,12 @@
 			top: 2rem;
 		}
 
-		.title-content h1 {
-			font-size: 3rem;
-		}
-
 		.links-buttons {
 			gap: 1.5rem;
 		}
 	}
 
 	@media (max-width: 640px) {
-		.title-content h1 {
-			font-size: 2rem;
-			flex-direction: column;
-			gap: 0.5rem;
-		}
-
 		.links-buttons {
 			flex-direction: column;
 			gap: 0.75rem;

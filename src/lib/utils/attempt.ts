@@ -56,7 +56,7 @@ export function attempt<E = Error, T = unknown>(operation: () => T): AttemptResu
  * @param operation - A `Promise` or function to execute.
  * @returns A result tuple or a promise of one, depending on input type.
  */
-export function attempt<E = Error, T = unknown>(
+export function attempt<E = unknown, T = unknown>(
 	operation: Promise<T> | (() => T)
 ): AttemptResult<E, T> | AttemptResultAsync<E, T> {
 	if (operation instanceof Promise) {
@@ -64,7 +64,6 @@ export function attempt<E = Error, T = unknown>(
 			.then((value: T) => [null, value] as const)
 			.catch((error: E) => [error, null] as const);
 	}
-
 	try {
 		const data = operation();
 		return [null, data];

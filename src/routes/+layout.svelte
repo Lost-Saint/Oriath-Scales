@@ -18,7 +18,7 @@
 <footer class="full-width">
 	<div>
 		Design by
-		<a href="/" target="_blank" aria-label="logo">
+		<a href="lost-saint.netlify.app" target="_blank" aria-label="logo">
 			<svg
 				fill="fillCurrent"
 				width="40px"
