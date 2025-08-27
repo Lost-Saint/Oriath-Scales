@@ -10,7 +10,7 @@
 	}
 </script>
 
-<section class="full-width flow">
+<section class="full-width flow top">
 	<LeagueSelector {selectedLeague} onLeagueChange={handleLeagueChange} />
 
 	<div class="content-wrapper">
@@ -71,6 +71,9 @@
 </section>
 
 <style>
+	section.top {
+		margin-top: 3rem;
+	}
 	/* Content Layout */
 	.content-wrapper {
 		display: flex;
