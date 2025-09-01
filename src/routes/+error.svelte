@@ -15,8 +15,8 @@
 			<h1>Not found!</h1>
 			<p>Blame the squirels!</p>
 			<p>
-				If you were expecting to find something here, please drop by the Discord chatroom and let us
-				know, or raise an issue on
+				If you were expecting to find something here, please drop by Github and let us know, or
+				raise an issue on
 				<a href="https://github.com/Lost-Saint/Oriath-Scales">GitHub</a>. Thanks!
 			</p>
 			<a href="/">Return home </a>
@@ -30,8 +30,7 @@
 			{/if}
 			<p>Please try reloading the page.</p>
 			<p>
-				If the error persists, please drop by the Discord chatroom and let us know, or raise an
-				issue on
+				If the error persists, please drop by Github and let us know, or raise an issue on
 				<a href="https://github.com/Lost-Saint/Oriath-Scales">GitHub</a>. Thanks!
 			</p>
 		{/if}
