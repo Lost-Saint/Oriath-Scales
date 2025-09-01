@@ -278,6 +278,13 @@
 		}
 	}
 
+	function handleKeyDown(e: KeyboardEvent) {
+		if (e.ctrlKey && e.key === 'v') {
+			// Clear existing text first, then allow paste
+			itemText = '';
+		}
+	}
+
 	$: {
 		itemDisplayHtml = formatItemText(itemText);
 	}
@@ -288,9 +295,12 @@
 		<div
 			class="item-input"
 			contenteditable
+			role="textbox"
+			tabindex="0"
 			bind:innerHTML={itemDisplayHtml}
 			on:paste={handlePaste}
 			on:input={handleInput}
+			on:keydown={handleKeyDown}
 			spellcheck="false"
 		></div>
 	</div>
