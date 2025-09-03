@@ -19,7 +19,7 @@
 				raise an issue on
 				<a href="https://github.com/Lost-Saint/Oriath-Scales">GitHub</a>. Thanks!
 			</p>
-			<a href="/">Return home </a>
+			<a href="/">Return home</a>
 		{:else}
 			<h1>Yikes!</h1>
 			<p>Something went wrong when we tried to render this page.</p>
