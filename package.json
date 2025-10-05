@@ -43,8 +43,8 @@
 		"melt": "^0.41.0"
 	},
 	"engines": {
-		"pnpm": ">=9.0.0",
-		"node": ">=18"
+		"pnpm": ">=10.0.0",
+		"node": ">=20"
 	},
 	"packageManager": "pnpm@10.18.0",
 	"pnpm": {

@@ -4,7 +4,12 @@
 	export let selectedLeague: string;
 	export let onLeagueChange: (league: string) => void;
 
-	const leagues = ['Rise of the Abyssal', 'HC Rise of the Abyssal', 'Standard', 'Hardcore'] as const;
+	const leagues = [
+		'Rise of the Abyssal',
+		'HC Rise of the Abyssal',
+		'Standard',
+		'Hardcore'
+	] as const;
 	let internalLeague = selectedLeague;
 
 	// Reactively watch for value changes and call the parent callback
