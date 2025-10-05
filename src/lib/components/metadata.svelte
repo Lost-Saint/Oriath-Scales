@@ -45,4 +45,12 @@
 	<meta property="og:description" content={description} />
 	<meta property="og:site_name" content={siteConfig.current.name} />
 	<meta property="og:locale" content="EN_US" />
+
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+	<meta name="apple-mobile-web-app-title" content={siteConfig.current.name} />
+	<meta name="application-name" content={siteConfig.current.name} />
+	<link rel="canonical" href={siteConfig.current.url + page.url.pathname} />
+	<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
 </svelte:head>

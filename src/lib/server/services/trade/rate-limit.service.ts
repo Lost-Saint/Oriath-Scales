@@ -1,26 +1,26 @@
 import type { RateLimitCheck, RateLimitState, RateLimitTier } from '$lib/types/trade-api.types.js';
 
-function createDefaultTiers(): RateLimitTier[] {
+const createDefaultTiers = (): RateLimitTier[] => {
 	const now = Date.now();
 	return [
 		{ hits: 0, max: 5, period: 10000, lastUpdated: now },
 		{ hits: 0, max: 15, period: 60000, lastUpdated: now },
 		{ hits: 0, max: 30, period: 300000, lastUpdated: now }
 	];
-}
+};
 
-function parseIntSafely(value: string | null | undefined): number | null {
+const parseIntSafely = (value: string | null | undefined): number | null => {
 	if (!value) return null;
 	const parsed = parseInt(value.trim(), 10);
 	return isNaN(parsed) ? null : parsed;
-}
+};
 
-function formatTime(ms: number): string {
+const formatTime = (ms: number): string => {
 	const seconds = Math.ceil(ms / 1000);
 	if (seconds < 60) return `${seconds}s`;
 	if (seconds < 3600) return `${Math.ceil(seconds / 60)}m`;
 	return `${Math.ceil(seconds / 3600)}h`;
-}
+};
 
 export class RateLimitService {
 	private state: RateLimitState;
@@ -29,19 +29,24 @@ export class RateLimitService {
 		this.state = { tiers: tiers || createDefaultTiers() };
 	}
 
-	private updateTier(tier: RateLimitTier): void {
+	private updateTier = (tier: RateLimitTier): void => {
 		const now = Date.now();
 		if (now - tier.lastUpdated >= tier.period) {
 			tier.hits = 0;
 			tier.lastUpdated = now;
 		}
-	}
+	};
+
+	private updateAllTiers = (): void => {
+		this.state.tiers.forEach(this.updateTier);
+	};
 
 	getStatus(): string {
+		this.updateAllTiers();
 		const now = Date.now();
+
 		return this.state.tiers
 			.map((tier, i) => {
-				this.updateTier(tier);
 				const remaining = Math.max(0, tier.max - tier.hits);
 				const timeLeft = Math.max(0, tier.period - (now - tier.lastUpdated));
 				const status = timeLeft > 0 ? `resets in ${formatTime(timeLeft)}` : 'reset now';
@@ -51,25 +56,20 @@ export class RateLimitService {
 	}
 
 	checkAndIncrementLimit(): RateLimitCheck {
-		let shortestWait = Infinity;
+		this.updateAllTiers();
 
-		for (const tier of this.state.tiers) {
-			this.updateTier(tier);
-
-			if (tier.hits >= tier.max) {
-				const timeLeft = tier.period - (Date.now() - tier.lastUpdated);
-				shortestWait = Math.min(shortestWait, Math.ceil(timeLeft / 1000));
-			}
-		}
+		// Find the shortest wait time among exceeded tiers
+		const shortestWait = this.state.tiers
+			.filter((tier) => tier.hits >= tier.max)
+			.map((tier) => Math.ceil((tier.period - (Date.now() - tier.lastUpdated)) / 1000))
+			.reduce((min, wait) => Math.min(min, wait), Infinity);
 
 		if (shortestWait < Infinity) {
 			return { allowed: false, timeToWait: shortestWait };
 		}
 
-		for (const tier of this.state.tiers) {
-			tier.hits++;
-		}
-
+		// Increment all tiers
+		this.state.tiers.forEach((tier) => tier.hits++);
 		return { allowed: true };
 	}
 
@@ -82,17 +82,13 @@ export class RateLimitService {
 
 		const states = stateHeader.split(',').map((s) => s.trim());
 		const now = Date.now();
-		let updated = 0;
 
-		for (let i = 0; i < Math.min(states.length, this.state.tiers.length); i++) {
-			const state = states[i];
-			if (!state) continue;
+		const updated = states.reduce((count, state, i) => {
+			if (i >= this.state.tiers.length) return count;
 
-			const parts = state.split(':');
-			if (parts.length < 2) continue;
-
-			const hits = parseIntSafely(parts[0]);
-			const periodSeconds = parseIntSafely(parts[1]);
+			const [hitsStr, periodStr] = state.split(':');
+			const hits = parseIntSafely(hitsStr);
+			const periodSeconds = parseIntSafely(periodStr);
 
 			if (hits !== null && periodSeconds !== null && hits >= 0 && periodSeconds > 0) {
 				const tier = this.state.tiers[i];
@@ -100,26 +96,30 @@ export class RateLimitService {
 					tier.hits = Math.min(hits, tier.max);
 					tier.period = periodSeconds * 1000;
 					tier.lastUpdated = now;
-					updated++;
+					return count + 1;
 				}
 			}
-		}
+
+			return count;
+		}, 0);
 
 		console.log(`[Rate Limits] Updated ${updated} tiers - ${this.getStatus()}`);
 	}
 
-	getRetryAfterFromHeaders(headers: Headers): number | undefined {
-		const retryAfter = headers.get('Retry-After');
-		const parsed = parseIntSafely(retryAfter);
-		return parsed && parsed >= 0 ? parsed : undefined;
-	}
+	getRetryAfterFromHeaders = (headers: Headers): number | undefined => {
+		const retryAfter = parseIntSafely(headers.get('Retry-After'));
+		return retryAfter && retryAfter >= 0 ? retryAfter : undefined;
+	};
 
 	setRestriction(seconds: number = 60): void {
-		for (const tier of this.state.tiers) {
+		const now = Date.now();
+		const restrictionPeriod = seconds * 1000;
+
+		this.state.tiers.forEach((tier) => {
 			tier.hits = tier.max;
-			tier.lastUpdated = Date.now();
-			tier.period = Math.max(tier.period, seconds * 1000);
-		}
+			tier.lastUpdated = now;
+			tier.period = Math.max(tier.period, restrictionPeriod);
+		});
 	}
 }
 
