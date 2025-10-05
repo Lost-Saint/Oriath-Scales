@@ -2,259 +2,358 @@ import type { StatGroup, StatOption } from '$lib/types/stats.types.js';
 import { attempt } from '$lib/utils/attempt.js';
 import Fuse from 'fuse.js';
 
-interface StatsCache {
+function isStatsApiResponse(data: unknown): data is { result: StatGroup[]; error?: string } {
+	return (
+		typeof data === 'object' &&
+		data !== null &&
+		'result' in data &&
+		Array.isArray((data as { result: unknown }).result)
+	);
+}
+
+function isStatGroup(obj: unknown): obj is StatGroup {
+	const candidate = obj as Record<string, unknown>;
+	return (
+		typeof obj === 'object' &&
+		obj !== null &&
+		'entries' in obj &&
+		Array.isArray(candidate.entries) &&
+		'label' in obj &&
+		typeof candidate.label === 'string'
+	);
+}
+
+function isStatEntry(
+	obj: unknown
+): obj is { id: string; text: string; option?: Record<string, unknown> } {
+	const candidate = obj as Record<string, unknown>;
+	return (
+		typeof obj === 'object' &&
+		obj !== null &&
+		'id' in obj &&
+		'text' in obj &&
+		typeof candidate.id === 'string' &&
+		typeof candidate.text === 'string'
+	);
+}
+
+interface OptimizedStatsCache {
 	allStats: StatOption[];
+	normalizedTextToStat: Map<string, StatOption>;
 	fuseInstance: Fuse<StatOption>;
+	implicitStats: StatOption[];
+	implicitNormalizedTextToStat: Map<string, StatOption>;
 	implicitFuseInstance: Fuse<StatOption> | null;
+	timestamp: number;
 }
 
-let cache: StatsCache | null = null;
-let lastFetchAttempt = 0;
+class StatsManager {
+	private cache: OptimizedStatsCache | null = null;
+	private lastFetchAttempt = 0;
+	private fetchPromise: Promise<StatOption[]> | null = null;
 
-const CACHE_RETRY_INTERVAL = 60000;
-const FUSE_THRESHOLD = 0.6;
+	private readonly CACHE_RETRY_INTERVAL = 60000; // 1 minute
+	private readonly CACHE_TTL = 300000; // 5 minutes
+	private readonly FUSE_THRESHOLD = 0.6;
 
-export async function fetchStats(): Promise<StatOption[]> {
-	if (cache) {
-		return cache.allStats;
-	}
-
-	const now = Date.now();
-	const timeSinceLastTry = now - lastFetchAttempt;
-
-	if (timeSinceLastTry < CACHE_RETRY_INTERVAL) {
-		throw new Error('Stats cache is unavailable. Please try again later.');
-	}
-
-	lastFetchAttempt = now;
-
-	try {
-		const response = await fetchStatsFromAPI();
-		const statsData = await parseStatsResponse(response);
-		const processedStats = processStatsData(statsData);
-
-		cache = createStatsCache(processedStats);
-		return cache.allStats;
-	} catch (error) {
-		clearStatsCache();
-		throw error;
-	}
-}
-
-async function fetchStatsFromAPI(): Promise<Response> {
-	const [fetchError, response] = await attempt(fetch('/api/poe/stats', { cache: 'force-cache' }));
-
-	if (fetchError) {
-		throw new Error(`Network failed: ${fetchError.message}`);
-	}
-
-	if (!response.ok) {
-		throw new Error(`Server error: ${response.status}`);
-	}
-
-	return response;
-}
-
-async function parseStatsResponse(response: Response): Promise<unknown> {
-	const [jsonError, data] = await attempt(response.json());
-
-	if (jsonError) {
-		throw new Error('Bad JSON from server');
-	}
-
-	if (data.error) {
-		throw new Error(data.error);
-	}
-
-	if (!data.result || !Array.isArray(data.result)) {
-		throw new Error('No stats data from server');
-	}
-
-	return data;
-}
-
-function processStatsData(data: unknown): { allStats: StatOption[]; implicitStats: StatOption[] } {
-	const allStats: StatOption[] = [];
-	const implicitStats: StatOption[] = [];
-
-	const typedData = data as { result: StatGroup[] };
-
-	for (const group of typedData.result) {
-		if (!group.entries || !Array.isArray(group.entries)) {
-			continue;
+	async fetchStats(): Promise<StatOption[]> {
+		if (this.fetchPromise) {
+			return this.fetchPromise;
 		}
 
-		for (const entry of group.entries) {
-			if (!entry) continue;
+		if (this.cache && this.isCacheValid()) {
+			return this.cache.allStats;
+		}
 
-			const stat: StatOption = {
-				id: entry.id,
-				text: entry.text,
-				type: group.label,
-				option: entry.option
-			};
+		const now = Date.now();
+		const timeSinceLastTry = now - this.lastFetchAttempt;
 
-			allStats.push(stat);
+		if (timeSinceLastTry < this.CACHE_RETRY_INTERVAL && !this.cache) {
+			throw new Error('Stats cache is unavailable. Please try again later.');
+		}
 
-			if (group.label === 'Implicit') {
-				implicitStats.push(stat);
+		this.lastFetchAttempt = now;
+		this.fetchPromise = this.doFetchStats();
+
+		try {
+			const result = await this.fetchPromise;
+			return result;
+		} finally {
+			this.fetchPromise = null;
+		}
+	}
+
+	private async doFetchStats(): Promise<StatOption[]> {
+		try {
+			const response = await this.fetchStatsFromAPI();
+			const statsData = await this.parseStatsResponse(response);
+			const processedStats = this.processStatsData(statsData);
+
+			this.cache = this.createOptimizedCache(processedStats);
+			return this.cache.allStats;
+		} catch (error) {
+			this.clearCache();
+			throw error;
+		}
+	}
+
+	private async fetchStatsFromAPI(): Promise<Response> {
+		const [fetchError, response] = await attempt(fetch('/api/poe/stats', { cache: 'force-cache' }));
+
+		if (fetchError) {
+			throw new Error(`Network failed: ${fetchError.message}`);
+		}
+
+		if (!response.ok) {
+			throw new Error(`Server error: ${response.status}`);
+		}
+
+		return response;
+	}
+
+	private async parseStatsResponse(
+		response: Response
+	): Promise<{ result: StatGroup[]; error?: string }> {
+		const [jsonError, data] = await attempt(response.json());
+
+		if (jsonError) {
+			throw new Error('Bad JSON from server');
+		}
+
+		// Type validation instead of assertion
+		if (!isStatsApiResponse(data)) {
+			throw new Error('Invalid response format from server');
+		}
+
+		if (data.error) {
+			throw new Error(data.error);
+		}
+
+		if (!data.result || data.result.length === 0) {
+			throw new Error('No stats data from server');
+		}
+
+		return data;
+	}
+
+	private processStatsData(data: { result: StatGroup[] }): {
+		allStats: StatOption[];
+		implicitStats: StatOption[];
+	} {
+		const allStats: StatOption[] = [];
+		const implicitStats: StatOption[] = [];
+
+		for (const group of data.result) {
+			if (!isStatGroup(group)) {
+				continue;
+			}
+
+			for (const entry of group.entries) {
+				if (!isStatEntry(entry)) {
+					continue;
+				}
+
+				const stat: StatOption = {
+					id: entry.id,
+					text: entry.text,
+					type: group.label,
+					option: entry.option
+				};
+
+				allStats.push(stat);
+
+				if (group.label === 'Implicit') {
+					implicitStats.push(stat);
+				}
 			}
 		}
+
+		if (allStats.length === 0) {
+			throw new Error('No valid stats received');
+		}
+
+		return { allStats, implicitStats };
 	}
 
-	if (allStats.length === 0) {
-		throw new Error('No stats received');
-	}
+	private createOptimizedCache(processedStats: {
+		allStats: StatOption[];
+		implicitStats: StatOption[];
+	}): OptimizedStatsCache {
+		const { allStats, implicitStats } = processedStats;
 
-	return { allStats, implicitStats };
-}
+		// Pre-compute normalized text mappings for O(1) lookups
+		const normalizedTextToStat = new Map<string, StatOption>();
+		const implicitNormalizedTextToStat = new Map<string, StatOption>();
 
-function createStatsCache(processedStats: {
-	allStats: StatOption[];
-	implicitStats: StatOption[];
-}): StatsCache {
-	const { allStats, implicitStats } = processedStats;
+		// Build lookup maps
+		for (const stat of allStats) {
+			const normalized = normalizeStatText(stat.text);
+			if (normalized) {
+				normalizedTextToStat.set(normalized, stat);
+			}
+		}
 
-	return {
-		allStats,
-		fuseInstance: createFuseInstance(allStats),
-		implicitFuseInstance: implicitStats.length > 0 ? createFuseInstance(implicitStats) : null
-	};
-}
+		for (const stat of implicitStats) {
+			const normalized = normalizeStatText(stat.text);
+			if (normalized) {
+				implicitNormalizedTextToStat.set(normalized, stat);
+			}
+		}
 
-export function findStatId(statText: string): string | null {
-	if (!cache) {
-		console.error('Stats cache not ready');
-		return null;
-	}
-
-	const cleanInput = normalizeStatText(statText);
-	if (cleanInput.length === 0) {
-		return null;
-	}
-
-	const searchingForImplicit = statText.toLowerCase().includes('implicit');
-	const searchConfig = getSearchConfiguration(searchingForImplicit);
-
-	const exactMatch = findExactMatch(cleanInput, searchConfig.stats);
-	if (exactMatch) {
-		logMatch('Exact match found', cleanInput, exactMatch, searchingForImplicit);
-		return exactMatch.id;
-	}
-
-	const fuzzyMatch = findFuzzyMatch(cleanInput, searchConfig.fuseInstance);
-	if (fuzzyMatch) {
-		logMatch('Fuzzy match found', cleanInput, fuzzyMatch, searchingForImplicit, fuzzyMatch.score);
-		return fuzzyMatch.id;
-	}
-
-	logNoMatch(cleanInput, searchingForImplicit, searchConfig.stats.length);
-	return null;
-}
-
-function getSearchConfiguration(searchingForImplicit: boolean) {
-	if (!cache) {
-		throw new Error('Cache not available');
-	}
-
-	if (searchingForImplicit && cache.implicitFuseInstance) {
 		return {
-			stats: cache.allStats.filter((stat) => stat.type === 'Implicit'),
-			fuseInstance: cache.implicitFuseInstance
+			allStats,
+			normalizedTextToStat,
+			fuseInstance: this.createFuseInstance(allStats),
+			implicitStats,
+			implicitNormalizedTextToStat,
+			implicitFuseInstance:
+				implicitStats.length > 0 ? this.createFuseInstance(implicitStats) : null,
+			timestamp: Date.now()
 		};
 	}
 
-	return {
-		stats: cache.allStats,
-		fuseInstance: cache.fuseInstance
-	};
-}
-
-function findExactMatch(cleanInput: string, stats: StatOption[]): StatOption | null {
-	for (const stat of stats) {
-		if (stat && normalizeStatText(stat.text) === cleanInput) {
-			return stat;
+	findStatId(statText: string): string | null {
+		if (!statText || typeof statText !== 'string') {
+			return null;
 		}
+
+		if (!this.cache) {
+			console.error('Stats cache not ready');
+			return null;
+		}
+
+		const cleanInput = normalizeStatText(statText);
+		if (!cleanInput) {
+			return null;
+		}
+
+		const searchingForImplicit = statText.toLowerCase().includes('implicit');
+		const searchConfig = this.getSearchConfiguration(searchingForImplicit);
+
+		const exactMatch = searchConfig.normalizedMap.get(cleanInput);
+		if (exactMatch) {
+			this.logMatch('Exact match found', cleanInput, exactMatch, searchingForImplicit);
+			return exactMatch.id;
+		}
+
+		const fuzzyMatch = this.findFuzzyMatch(cleanInput, searchConfig.fuseInstance);
+		if (fuzzyMatch) {
+			this.logMatch(
+				'Fuzzy match found',
+				cleanInput,
+				fuzzyMatch,
+				searchingForImplicit,
+				fuzzyMatch.score
+			);
+			return fuzzyMatch.id;
+		}
+
+		this.logNoMatch(cleanInput, searchingForImplicit, searchConfig.normalizedMap.size);
+		return null;
 	}
-	return null;
-}
 
-function findFuzzyMatch(
-	cleanInput: string,
-	fuseInstance: Fuse<StatOption>
-): (StatOption & { score?: number }) | null {
-	const searchResults = fuseInstance.search(cleanInput);
-	const bestResult = searchResults[0];
+	private getSearchConfiguration(searchingForImplicit: boolean) {
+		if (!this.cache) {
+			throw new Error('Cache not available');
+		}
 
-	if (bestResult && bestResult.score !== undefined && bestResult.score < FUSE_THRESHOLD) {
-		return { ...bestResult.item, score: bestResult.score };
-	}
+		if (searchingForImplicit && this.cache.implicitFuseInstance) {
+			return {
+				normalizedMap: this.cache.implicitNormalizedTextToStat,
+				fuseInstance: this.cache.implicitFuseInstance
+			};
+		}
 
-	return null;
-}
-
-enum LogLevel {
-	ERROR,
-	WARN,
-	INFO,
-	DEBUG
-}
-const CURRENT_LOG_LEVEL = LogLevel.DEBUG;
-
-function logMatch(
-	type: string,
-	input: string,
-	match: StatOption,
-	wasImplicitSearch: boolean,
-	score?: number
-): void {
-	if (CURRENT_LOG_LEVEL >= LogLevel.DEBUG) {
-		const logData: Record<string, unknown> = {
-			input,
-			match: match.text,
-			id: match.id,
-			type: match.type,
-			wasImplicitSearch
+		return {
+			normalizedMap: this.cache.normalizedTextToStat,
+			fuseInstance: this.cache.fuseInstance
 		};
-		if (score !== undefined) {
-			logData.score = score;
-		}
-		console.debug(type, logData);
 	}
-}
 
-function logNoMatch(input: string, wasImplicitSearch: boolean, statsSearched: number): void {
-	if (CURRENT_LOG_LEVEL >= LogLevel.DEBUG) {
-		console.debug('No match found:', {
-			input,
-			wasImplicitSearch,
-			statsSearched
+	private findFuzzyMatch(
+		cleanInput: string,
+		fuseInstance: Fuse<StatOption>
+	): (StatOption & { score?: number }) | null {
+		const searchResults = fuseInstance.search(cleanInput);
+		const bestResult = searchResults[0];
+
+		if (bestResult && bestResult.score !== undefined && bestResult.score < this.FUSE_THRESHOLD) {
+			return { ...bestResult.item, score: bestResult.score };
+		}
+
+		return null;
+	}
+
+	private createFuseInstance(stats: StatOption[]): Fuse<StatOption> {
+		return new Fuse(stats, {
+			keys: ['text'],
+			includeScore: true,
+			threshold: this.FUSE_THRESHOLD,
+			distance: 300,
+			ignoreLocation: true,
+			minMatchCharLength: 3,
+			useExtendedSearch: true,
+			getFn: (obj, path) => {
+				if (path === 'text' && typeof obj.text === 'string') {
+					return normalizeStatText(obj.text);
+				}
+				const value = obj[path as keyof StatOption];
+				return value != null ? String(value) : '';
+			}
 		});
 	}
-}
 
-function createFuseInstance(stats: StatOption[]): Fuse<StatOption> {
-	return new Fuse(stats, {
-		keys: ['text'],
-		includeScore: true,
-		threshold: FUSE_THRESHOLD,
-		distance: 300,
-		ignoreLocation: true,
-		minMatchCharLength: 3,
-		useExtendedSearch: true,
-		getFn: (obj, path) => {
-			if (path === 'text' && typeof obj.text === 'string') {
-				return normalizeStatText(obj.text);
+	private isCacheValid(): boolean {
+		return this.cache !== null && Date.now() - this.cache.timestamp < this.CACHE_TTL;
+	}
+
+	private clearCache(): void {
+		this.cache = null;
+	}
+
+	// Logging methods
+	private logMatch(
+		type: string,
+		input: string,
+		match: StatOption,
+		wasImplicitSearch: boolean,
+		score?: number
+	): void {
+		if (process.env.NODE_ENV === 'development') {
+			const logData: Record<string, unknown> = {
+				input: this.sanitizeForLogging(input),
+				match: this.sanitizeForLogging(match.text),
+				id: match.id,
+				type: match.type,
+				wasImplicitSearch
+			};
+			if (score !== undefined) {
+				logData.score = score;
 			}
-			const value = obj[path as keyof StatOption];
-			return value != null ? String(value) : '';
+			console.debug(type, logData);
 		}
-	});
+	}
+
+	private logNoMatch(input: string, wasImplicitSearch: boolean, statsSearched: number): void {
+		if (process.env.NODE_ENV === 'development') {
+			console.debug('No match found:', {
+				input: this.sanitizeForLogging(input),
+				wasImplicitSearch,
+				statsSearched
+			});
+		}
+	}
+
+	private sanitizeForLogging(text: string): string {
+		return text.replace(/[<>]/g, '');
+	}
 }
 
-function clearStatsCache(): void {
-	cache = null;
-}
+const statsManager = new StatsManager();
+
+// Public API exports
+export const fetchStats = (): Promise<StatOption[]> => statsManager.fetchStats();
+export const findStatId = (statText: string): string | null => statsManager.findStatId(statText);
 
 function normalizeStatText(text: string): string {
 	if (!text || typeof text !== 'string') {
@@ -275,7 +374,12 @@ function normalizeStatText(text: string): string {
 		.trim();
 }
 
+// Value extraction utility
 export function extractValue(statText: string): number {
+	if (!statText || typeof statText !== 'string') {
+		return 0;
+	}
+
 	const matches = statText.match(/([+-]?\d+\.?\d*)/g);
 	if (!matches) return 0;
 	return parseFloat(matches[0]);
