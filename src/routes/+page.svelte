@@ -3,7 +3,7 @@
 	import LeagueSelector from '$lib/components/LeagueSelector.svelte';
 	import Tip from '$lib/components/tip.svelte';
 
-	let selectedLeague = 'Rise of the Abyssal';
+	let selectedLeague = 'Fate of the Vaal';
 
 	function handleLeagueChange(league: string) {
 		selectedLeague = league;
