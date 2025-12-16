@@ -5,8 +5,8 @@
 	export let onLeagueChange: (league: string) => void;
 
 	const leagues = [
-		'Rise of the Abyssal',
-		'HC Rise of the Abyssal',
+		'Fate of the Vaal',
+		'HC Fate of the Vaal',
 		'Standard',
 		'Hardcore'
 	] as const;
